@@ -1,0 +1,3 @@
+id,usuario_id,data,descricao,valor,tipo,criado_em,email_enviado
+1,3,2024-01-01,Lanche na escola,45.50,despesa,2024-01-01T00:00:00Z,true
+2,3,2024-01-02,Cinema,35.00,despesa,2024-01-02T00:00:00Z,true

@@ -1,0 +1,4 @@
+id,nome,email,senha,tipo_usuario,senha_hash,criado_em,ativo
+1,Pai,pai@familia.com,admin123,admin,$2b$10$ykD0fw1U/jUQB5Lm2ico2.1WKcXbk9JF40wqpk0S4vXSn/MFQznle,2026-11-11T10:41:13.419Z,true
+2,Mãe,mae@familia.com,admin123,admin,$2b$10$XChpaRCtA4y39Owa1fGUqOKfmFwZSF/FxZyrQUQwUpK/M/eJSm4w2,2026-11-11T10:41:13.496Z,true
+3,Filha,filha@familia.com,user123,user,$2b$10$hDJGX0gck2hBq9kJIwkCQ.5yUSIpJeV2zFq3nsmFZorbbJNHGo5Um,2026-11-11T10:41:13.569Z,true

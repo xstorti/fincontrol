@@ -83,7 +83,7 @@ export default function DashboardPage() {
             className="p-2.5 rounded-lg bg-neutral-700/50 hover:bg-neutral-600/50 text-neutral-300 hover:text-white transition-all duration-300"
             aria-label="Sair"
           >
-            <LogOut size={20} />
+            <LogOut size={20} strokeWidth={2.5} />
           </button>
         </div>
       </header>
@@ -128,12 +128,12 @@ export default function DashboardPage() {
                       <div className="mt-3 flex items-center gap-2">
                         {kpi.variacao_percentual > 0 ? (
                           <>
-                            <TrendingDown className="w-4 h-4" />
+                            <TrendingDown className="w-4 h-4" strokeWidth={2.5} />
                             <span className="text-sm font-semibold">+{kpi.variacao_percentual.toFixed(1)}% vs período anterior</span>
                           </>
                         ) : kpi.variacao_percentual < 0 ? (
                           <>
-                            <TrendingUp className="w-4 h-4" />
+                            <TrendingUp className="w-4 h-4" strokeWidth={2.5} />
                             <span className="text-sm font-semibold">{kpi.variacao_percentual.toFixed(1)}% vs período anterior</span>
                           </>
                         ) : (
@@ -168,12 +168,12 @@ export default function DashboardPage() {
                 }`}>
                   {kpi.saldo_atual >= 0 ? (
                     <>
-                      <TrendingUp size={16} />
+                      <TrendingUp size={16} strokeWidth={2.5} />
                       Saldo positivo
                     </>
                   ) : (
                     <>
-                      <TrendingDown size={16} />
+                      <TrendingDown size={16} strokeWidth={2.5} />
                       Saldo em débito
                     </>
                   )}

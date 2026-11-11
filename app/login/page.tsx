@@ -86,7 +86,7 @@ export default function LoginPage() {
                   Email
                 </label>
                 <div className="relative group">
-                  <Mail className="absolute left-4 top-4 w-5 h-5 text-neutral-500 transition-colors group-focus-within:text-primary-400" />
+                  <Mail className="absolute left-4 top-4 w-5 h-5 text-neutral-500 transition-colors group-focus-within:text-primary-400" strokeWidth={2.5} />
                   <input
                     id="email"
                     type="email"
@@ -105,7 +105,7 @@ export default function LoginPage() {
                   Senha
                 </label>
                 <div className="relative group">
-                  <Lock className="absolute left-4 top-4 w-5 h-5 text-neutral-500 transition-colors group-focus-within:text-primary-400" />
+                  <Lock className="absolute left-4 top-4 w-5 h-5 text-neutral-500 transition-colors group-focus-within:text-primary-400" strokeWidth={2.5} />
                   <input
                     id="senha"
                     type="password"
@@ -133,7 +133,7 @@ export default function LoginPage() {
                 ) : (
                   <>
                     Entrar
-                    <ArrowRight size={18} className="transition-transform group-hover:translate-x-1" />
+                    <ArrowRight size={18} strokeWidth={2.5} className="transition-transform group-hover:translate-x-1" />
                   </>
                 )}
               </LoadingButton>

@@ -124,7 +124,7 @@ export default function AlterarSenhaPage() {
                   onClick={() => setShowPasswords({ ...showPasswords, atual: !showPasswords.atual })}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-300 transition-colors"
                 >
-                  {showPasswords.atual ? <EyeOff size={20} /> : <Eye size={20} />}
+                  {showPasswords.atual ? <EyeOff size={20} strokeWidth={2.5} /> : <Eye size={20} strokeWidth={2.5} />}
                 </button>
               </div>
             </div>
@@ -146,7 +146,7 @@ export default function AlterarSenhaPage() {
                   onClick={() => setShowPasswords({ ...showPasswords, nova: !showPasswords.nova })}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-300 transition-colors"
                 >
-                  {showPasswords.nova ? <EyeOff size={20} /> : <Eye size={20} />}
+                  {showPasswords.nova ? <EyeOff size={20} strokeWidth={2.5} /> : <Eye size={20} strokeWidth={2.5} />}
                 </button>
               </div>
             </div>
@@ -168,7 +168,7 @@ export default function AlterarSenhaPage() {
                   onClick={() => setShowPasswords({ ...showPasswords, confirmar: !showPasswords.confirmar })}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-300 transition-colors"
                 >
-                  {showPasswords.confirmar ? <EyeOff size={20} /> : <Eye size={20} />}
+                  {showPasswords.confirmar ? <EyeOff size={20} strokeWidth={2.5} /> : <Eye size={20} strokeWidth={2.5} />}
                 </button>
               </div>
             </div>
@@ -187,7 +187,7 @@ export default function AlterarSenhaPage() {
               href="/admin"
               className="flex items-center justify-center gap-2 w-full py-2 text-neutral-400 hover:text-neutral-300 font-medium transition-colors"
             >
-              <ArrowLeft size={18} />
+              <ArrowLeft size={18} strokeWidth={2.5} />
               Voltar ao Painel
             </Link>
           </form>

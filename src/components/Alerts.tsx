@@ -17,7 +17,7 @@ export function ErrorAlert({ message, details, action }: ErrorAlertProps) {
   return (
     <div className="p-4 mb-4 bg-danger-50 dark:bg-danger-900/20 border border-danger-200 dark:border-danger-700/50 rounded-lg">
       <div className="flex items-start gap-3">
-        <AlertCircle className="w-5 h-5 text-danger-600 dark:text-danger-500 shrink-0 mt-0.5" />
+        <AlertCircle className="w-5 h-5 text-danger-600 dark:text-danger-500 shrink-0 mt-0.5" strokeWidth={2.5} />
         <div className="flex-1">
           <p className="font-semibold text-danger-700 dark:text-danger-600">{message}</p>
           {details && <p className="text-danger-600 dark:text-danger-500 text-sm mt-1">{details}</p>}
@@ -48,7 +48,7 @@ export function SuccessAlert({ message, details }: { message: string; details?: 
   return (
     <div className="p-4 mb-4 bg-success-50 dark:bg-success-900/20 border border-success-200 dark:border-success-700/50 rounded-lg">
       <div className="flex items-start gap-3">
-        <CheckCircle className="w-5 h-5 text-success-600 dark:text-success-500 shrink-0 mt-0.5" />
+        <CheckCircle className="w-5 h-5 text-success-600 dark:text-success-500 shrink-0 mt-0.5" strokeWidth={2.5} />
         <div className="flex-1">
           <p className="font-semibold text-success-700 dark:text-success-600">{message}</p>
           {details && <p className="text-success-600 dark:text-success-500 text-sm mt-1">{details}</p>}

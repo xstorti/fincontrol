@@ -88,14 +88,14 @@ export default function AdminPage() {
               href="/alterar-senha"
               className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-primary-600 hover:bg-primary-50 rounded-lg transition-colors"
             >
-              <Key size={18} />
+              <Key size={18} strokeWidth={2.5} />
               Alterar Senha
             </Link>
             <button
               onClick={handleLogout}
               className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-danger-600 hover:bg-danger-50 rounded-lg transition-colors"
             >
-              <LogOut size={18} />
+              <LogOut size={18} strokeWidth={2.5} />
               Sair
             </button>
           </div>
@@ -124,7 +124,7 @@ export default function AdminPage() {
                   <p className="text-3xl sm:text-5xl font-black text-neutral-950 mt-3 sm:mt-4 leading-none" style={{textShadow: '0 0 10px rgba(0,0,0,0.1)'}}>{stats.total_usuarios}</p>
                 </div>
                 <div className="p-3 bg-primary-100 rounded-xl group-hover:bg-primary-200 transition-colors">
-                  <Users className="w-8 h-8 text-primary-950" />
+                  <Users className="w-8 h-8 text-primary-950" strokeWidth={2.5} />
                 </div>
               </div>
             </div>
@@ -139,7 +139,7 @@ export default function AdminPage() {
                   </p>
                 </div>
                 <div className="p-3 bg-danger-100 rounded-xl group-hover:bg-danger-200 transition-colors">
-                  <TrendingUp className="w-8 h-8 text-danger-950" />
+                  <TrendingUp className="w-8 h-8 text-danger-950" strokeWidth={2.5} />
                 </div>
               </div>
             </div>
@@ -160,7 +160,7 @@ export default function AdminPage() {
                     ? 'bg-success-100 group-hover:bg-success-200' 
                     : 'bg-danger-100 group-hover:bg-danger-200'
                 }`}>
-                  <Wallet className="w-10 h-10 text-black" />
+                  <Wallet className="w-10 h-10 text-black" strokeWidth={2.5} />
                 </div>
               </div>
             </div>
@@ -175,7 +175,7 @@ export default function AdminPage() {
             className="group block p-4 sm:p-6 bg-white rounded-xl shadow-sm hover:shadow-lg border border-neutral-100 hover:border-primary-200 transition-all hover-lift"
           >
             <div className="p-3 bg-primary-100 rounded-lg w-fit mb-4 group-hover:bg-primary-200 transition-colors">
-              <Users className="w-10 h-10 text-black" />
+              <Users className="w-10 h-10 text-black" strokeWidth={2.5} />
             </div>
             <h3 className="font-black text-neutral-950 mb-1 text-lg">Usuários</h3>
             <p className="text-xs text-neutral-600 leading-relaxed">Criar, editar, ativar/desativar</p>
@@ -187,7 +187,7 @@ export default function AdminPage() {
             className="group block p-4 sm:p-6 bg-white rounded-xl shadow-sm hover:shadow-lg border border-neutral-100 hover:border-success-200 transition-all hover-lift"
           >
             <div className="p-3 bg-success-100 rounded-lg w-fit mb-4 group-hover:bg-success-200 transition-colors">
-              <Wallet className="w-10 h-10 text-black" />
+              <Wallet className="w-10 h-10 text-black" strokeWidth={2.5} />
             </div>
             <h3 className="font-black text-neutral-950 mb-1 text-lg">Créditos</h3>
             <p className="text-xs text-neutral-600 leading-relaxed">Adicionar saldo para usuários</p>
@@ -199,7 +199,7 @@ export default function AdminPage() {
             className="group block p-4 sm:p-6 bg-white rounded-xl shadow-sm hover:shadow-lg border border-neutral-100 hover:border-secondary-200 transition-all hover-lift"
           >
             <div className="p-3 bg-secondary-100 rounded-lg w-fit mb-4 group-hover:bg-secondary-200 transition-colors">
-              <Mail className="w-10 h-10 text-black" />
+              <Mail className="w-10 h-10 text-black" strokeWidth={2.5} />
             </div>
             <h3 className="font-black text-neutral-950 mb-1 text-lg">Notificações</h3>
             <p className="text-xs text-neutral-600 leading-relaxed">Configurar notificações por email</p>
@@ -211,7 +211,7 @@ export default function AdminPage() {
             className="group block p-4 sm:p-6 bg-white rounded-xl shadow-sm hover:shadow-lg border border-neutral-100 hover:border-warning-200 transition-all hover-lift"
           >
             <div className="p-3 bg-warning-100 rounded-lg w-fit mb-4 group-hover:bg-warning-200 transition-colors">
-              <BarChart3 className="w-10 h-10 text-black" />
+              <BarChart3 className="w-10 h-10 text-black" strokeWidth={2.5} />
             </div>
             <h3 className="font-black text-neutral-950 mb-1 text-lg">Relatórios</h3>
             <p className="text-xs text-neutral-600 leading-relaxed">Visualizar e exportar dados</p>
@@ -223,7 +223,7 @@ export default function AdminPage() {
           href="/dashboard"
           className="inline-flex items-center gap-2 px-6 py-3 bg-neutral-600 hover:bg-neutral-700 text-white font-semibold rounded-lg transition-all duration-300 hover-lift"
         >
-          <ArrowLeft size={18} />
+          <ArrowLeft size={18} strokeWidth={2.5} />
           Voltar ao Dashboard
         </Link>
       </main>

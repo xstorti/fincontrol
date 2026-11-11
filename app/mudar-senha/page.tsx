@@ -112,7 +112,7 @@ export default function MudarSenhaPage() {
         {/* Header Section */}
         <div className="text-center mb-12">
           <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-primary-500 to-secondary-500 rounded-3xl mb-6 shadow-2xl shadow-primary-500/50">
-            <Lock className="w-10 h-10 text-white" />
+            <Lock className="w-10 h-10 text-white" strokeWidth={2.5} />
           </div>
 
           <h1 className="text-4xl font-black text-white mb-2 tracking-tight">Alterar Senha</h1>
@@ -140,7 +140,7 @@ export default function MudarSenhaPage() {
                   Senha Atual
                 </label>
                 <div className="relative group">
-                  <Lock className="absolute left-4 top-4 w-5 h-5 text-neutral-500 transition-colors group-focus-within:text-primary-400" />
+                  <Lock className="absolute left-4 top-4 w-5 h-5 text-neutral-500 transition-colors group-focus-within:text-primary-400" strokeWidth={2.5} />
                   <input
                     type={showPassword ? 'text' : 'password'}
                     placeholder="Digite sua senha atual"
@@ -155,9 +155,9 @@ export default function MudarSenhaPage() {
                     className="absolute right-4 top-4 text-neutral-500 hover:text-neutral-300 transition-colors"
                   >
                     {showPassword ? (
-                      <EyeOff className="w-5 h-5" />
+                      <EyeOff className="w-5 h-5" strokeWidth={2.5} />
                     ) : (
-                      <Eye className="w-5 h-5" />
+                      <Eye className="w-5 h-5" strokeWidth={2.5} />
                     )}
                   </button>
                 </div>
@@ -169,7 +169,7 @@ export default function MudarSenhaPage() {
                   Nova Senha
                 </label>
                 <div className="relative group">
-                  <Lock className="absolute left-4 top-4 w-5 h-5 text-neutral-500 transition-colors group-focus-within:text-primary-400" />
+                  <Lock className="absolute left-4 top-4 w-5 h-5 text-neutral-500 transition-colors group-focus-within:text-primary-400" strokeWidth={2.5} />
                   <input
                     type={showPassword ? 'text' : 'password'}
                     placeholder="Digite a nova senha"
@@ -189,7 +189,7 @@ export default function MudarSenhaPage() {
                   Confirme a Nova Senha
                 </label>
                 <div className="relative group">
-                  <Lock className="absolute left-4 top-4 w-5 h-5 text-neutral-500 transition-colors group-focus-within:text-primary-400" />
+                  <Lock className="absolute left-4 top-4 w-5 h-5 text-neutral-500 transition-colors group-focus-within:text-primary-400" strokeWidth={2.5} />
                   <input
                     type={showPassword ? 'text' : 'password'}
                     placeholder="Confirme a nova senha"

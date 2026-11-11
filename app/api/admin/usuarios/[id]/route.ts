@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withAdminAuth, createErrorResponse } from '@/lib/middleware';
-import { readCsv, updateCsvRow, deleteCsvRow } from '@/lib/csv';
-import { User, ApiResponse } from '@/types';
+import { supabaseAdmin } from '@/lib/supabase';
+import { ApiResponse } from '@/types';
 
 // PUT - Update user
 export async function PUT(
@@ -20,15 +20,18 @@ export async function PUT(
     const { ativo, tipo_usuario } = body;
 
     // Verify user exists
-    const users = readCsv<User>('users.csv');
-    const existingUser = users.find((u) => u.id === id);
+    const { data: existingUser, error: fetchError } = await supabaseAdmin
+      .from('users')
+      .select('id')
+      .eq('id', parseInt(id))
+      .single();
 
-    if (!existingUser) {
+    if (fetchError || !existingUser) {
       return createErrorResponse('Usuário não encontrado', 404);
     }
 
-    // Update user
-    const updates: Partial<User> = {};
+    // Prepare updates
+    const updates: any = {};
 
     if (typeof ativo === 'boolean') {
       updates.ativo = ativo;
@@ -38,10 +41,15 @@ export async function PUT(
       updates.tipo_usuario = tipo_usuario;
     }
 
-    const updated = updateCsvRow<User>('users.csv', id, updates);
+    // Update user
+    const { error: updateError } = await supabaseAdmin
+      .from('users')
+      .update(updates)
+      .eq('id', parseInt(id));
 
-    if (!updated) {
-      return createErrorResponse('Erro ao atualizar usuário', 400);
+    if (updateError) {
+      console.error('Update error:', updateError);
+      return createErrorResponse('Erro ao atualizar usuário', 500);
     }
 
     return NextResponse.json(
@@ -76,9 +84,13 @@ export async function DELETE(
       return createErrorResponse('Não pode deletar sua própria conta', 400);
     }
 
-    const deleted = deleteCsvRow<User>('users.csv', id);
+    // Delete user
+    const { error: deleteError } = await supabaseAdmin
+      .from('users')
+      .delete()
+      .eq('id', parseInt(id));
 
-    if (!deleted) {
+    if (deleteError) {
       return createErrorResponse('Usuário não encontrado', 404);
     }
 

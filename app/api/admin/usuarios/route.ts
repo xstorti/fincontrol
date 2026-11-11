@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withAdminAuth, createErrorResponse } from '@/lib/middleware';
-import { readCsv, writeCsv, appendToCsv, updateCsvRow } from '@/lib/csv';
+import { supabaseAdmin } from '@/lib/supabase';
 import { hashPassword, generateTemporaryPassword } from '@/lib/auth';
-import { generateId } from '@/lib/utils';
 import { isValidEmail } from '@/lib/utils';
 import { User, ApiResponse } from '@/types';
 
@@ -15,12 +14,19 @@ export async function GET(req: NextRequest) {
       return createErrorResponse('Acesso negado', 403);
     }
 
-    const users = readCsv<User>('users.csv');
+    const { data: users, error: dbError } = await supabaseAdmin
+      .from('users')
+      .select('*');
+
+    if (dbError) {
+      console.error('DB error:', dbError);
+      return createErrorResponse('Erro ao listar usuários', 500);
+    }
 
     return NextResponse.json(
       {
         success: true,
-        data: users,
+        data: users || [],
       } as ApiResponse<User[]>,
       { status: 200 }
     );
@@ -52,8 +58,13 @@ export async function POST(req: NextRequest) {
     }
 
     // Check if email already exists
-    const users = readCsv<User>('users.csv');
-    if (users.some((u) => u.email === email)) {
+    const { data: existingUser } = await supabaseAdmin
+      .from('users')
+      .select('email')
+      .eq('email', email)
+      .single();
+
+    if (existingUser) {
       return createErrorResponse('Email já cadastrado', 400);
     }
 
@@ -61,26 +72,35 @@ export async function POST(req: NextRequest) {
     const tempPassword = generateTemporaryPassword();
     const senhaHash = await hashPassword(tempPassword);
 
-    // Create new user
-    const newUser: User = {
-      id: generateId(),
-      nome,
-      email,
-      senha_hash: senhaHash,
-      tipo_usuario,
-      criado_em: new Date().toISOString(),
-      ativo: true,
-    };
+    // Create new user in Supabase
+    const { data: newUser, error: insertError } = await supabaseAdmin
+      .from('users')
+      .insert([
+        {
+          nome,
+          email,
+          senha_hash: senhaHash,
+          tipo_usuario,
+          ativo: true,
+        },
+      ])
+      .select();
 
-    // Save user
-    appendToCsv<User>('users.csv', newUser);
+    if (insertError || !newUser || newUser.length === 0) {
+      console.error('Insert error:', insertError);
+      return createErrorResponse('Erro ao criar usuário', 500);
+    }
 
     return NextResponse.json(
       {
         success: true,
         data: {
-          ...newUser,
-          senha_hash: undefined,
+          id: newUser[0].id,
+          nome: newUser[0].nome,
+          email: newUser[0].email,
+          tipo_usuario: newUser[0].tipo_usuario,
+          criado_em: newUser[0].criado_em,
+          ativo: newUser[0].ativo,
           temp_password: tempPassword,
         },
       },

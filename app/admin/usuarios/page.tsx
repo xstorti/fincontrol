@@ -31,6 +31,7 @@ export default function UsuariosPage() {
   const [passwordResult, setPasswordResult] = useState<{ user_id: string; temp_password?: string } | null>(null);
   const [clearingUser, setClearingUser] = useState<{ id: string; name: string } | null>(null);
   const [clearLoading, setClearLoading] = useState(false);
+  const [clearConfirmed, setClearConfirmed] = useState(false);
 
   useEffect(() => {
     fetchUsers();
@@ -455,7 +456,10 @@ export default function UsuariosPage() {
                     🗑️ Deletar
                   </button>
                   <button
-                    onClick={() => setClearingUser({ id: u.id, name: u.nome })}
+                    onClick={() => {
+                      setClearingUser({ id: u.id, name: u.nome });
+                      setClearConfirmed(false);
+                    }}
                     className="px-3 py-1 text-xs font-semibold rounded bg-warning-100 dark:bg-warning-900/30 text-warning-700 dark:text-warning-400 hover:bg-warning-200 dark:hover:bg-warning-800/50 transition-colors"
                   >
                     🧹 Limpar
@@ -485,7 +489,8 @@ export default function UsuariosPage() {
                 <label className="flex items-center gap-2 cursor-pointer">
                   <input
                     type="checkbox"
-                    id="confirm-clear"
+                    checked={clearConfirmed}
+                    onChange={(e) => setClearConfirmed(e.target.checked)}
                     className="w-4 h-4 rounded cursor-pointer"
                   />
                   <span className="text-sm text-neutral-700 dark:text-neutral-300">
@@ -497,13 +502,16 @@ export default function UsuariosPage() {
               <div className="flex gap-2">
                 <button
                   onClick={handleClearTransactions}
-                  disabled={!((document.getElementById('confirm-clear') as HTMLInputElement)?.checked) || clearLoading}
+                  disabled={!clearConfirmed || clearLoading}
                   className="flex-1 py-2 bg-danger-600 hover:bg-danger-700 disabled:bg-neutral-400 dark:disabled:bg-neutral-600 text-white font-semibold rounded-lg transition-colors disabled:cursor-not-allowed"
                 >
                   {clearLoading ? 'Limpando...' : 'Deletar Tudo'}
                 </button>
                 <button
-                  onClick={() => setClearingUser(null)}
+                  onClick={() => {
+                    setClearingUser(null);
+                    setClearConfirmed(false);
+                  }}
                   className="flex-1 py-2 bg-neutral-300 dark:bg-neutral-700 hover:bg-neutral-400 dark:hover:bg-neutral-600 text-neutral-900 dark:text-neutral-100 font-semibold rounded-lg transition-colors"
                 >
                   Cancelar

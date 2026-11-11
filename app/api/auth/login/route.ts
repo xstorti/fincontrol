@@ -56,7 +56,7 @@ export async function POST(req: NextRequest) {
           nome: user.nome,
           email: user.email,
           tipo_usuario: user.tipo_usuario,
-          senha_temporaria: user.senha_temporaria,
+          senha_temporaria: user.senha_temporaria === true, // Treat null/undefined as false
         },
       } as ApiResponse<any>,
       { status: 200 }

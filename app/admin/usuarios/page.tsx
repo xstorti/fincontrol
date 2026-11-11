@@ -86,6 +86,28 @@ export default function UsuariosPage() {
     }
   };
 
+  const handleDelete = async (userId: string, userName: string) => {
+    if (!window.confirm(`Tem certeza que deseja deletar o usuário "${userName}"? Esta ação não pode ser desfeita.`)) {
+      return;
+    }
+
+    try {
+      const res = await fetch(`/api/admin/usuarios/${userId}`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+      });
+
+      if (res.ok) {
+        await fetchUsers();
+      } else {
+        const data = await res.json();
+        setError(data.error || 'Erro ao deletar usuário');
+      }
+    } catch (err: any) {
+      setError(err.message);
+    }
+  };
+
   return (
     <div className="flex flex-col min-h-screen bg-neutral-50 dark:bg-neutral-900">
       {/* Header */}
@@ -234,16 +256,24 @@ export default function UsuariosPage() {
                     Tipo: <span className="font-semibold">{u.tipo_usuario}</span>
                   </p>
                 </div>
-                <button
-                  onClick={() => handleToggleActive(u.id, u.ativo)}
-                  className={`px-3 py-1 text-xs font-semibold rounded transition-colors ${
-                    u.ativo
-                      ? 'bg-success-100 dark:bg-success-900/30 text-success-700 dark:text-success-400 hover:bg-success-200 dark:hover:bg-success-800/50'
-                      : 'bg-danger-100 dark:bg-danger-900/30 text-danger-700 dark:text-danger-400 hover:bg-danger-200 dark:hover:bg-danger-800/50'
-                  }`}
-                >
-                  {u.ativo ? '✓ Ativo' : '✗ Inativo'}
-                </button>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => handleToggleActive(u.id, u.ativo)}
+                    className={`px-3 py-1 text-xs font-semibold rounded transition-colors ${
+                      u.ativo
+                        ? 'bg-success-100 dark:bg-success-900/30 text-success-700 dark:text-success-400 hover:bg-success-200 dark:hover:bg-success-800/50'
+                        : 'bg-danger-100 dark:bg-danger-900/30 text-danger-700 dark:text-danger-400 hover:bg-danger-200 dark:hover:bg-danger-800/50'
+                    }`}
+                  >
+                    {u.ativo ? '✓ Ativo' : '✗ Inativo'}
+                  </button>
+                  <button
+                    onClick={() => handleDelete(u.id, u.nome)}
+                    className="px-3 py-1 text-xs font-semibold rounded bg-danger-100 dark:bg-danger-900/30 text-danger-700 dark:text-danger-400 hover:bg-danger-200 dark:hover:bg-danger-800/50 transition-colors"
+                  >
+                    🗑️ Deletar
+                  </button>
+                </div>
               </div>
             ))}
           </div>

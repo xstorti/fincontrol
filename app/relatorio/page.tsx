@@ -93,26 +93,41 @@ export default function RelatorioPage() {
       const element = document.getElementById('report-content');
       if (!element) return;
 
-      // Criar um clone sem classes dinâmicas para evitar erro com cores LAB
+      // Criar um clone e remover TODAS as classes para evitar colors LAB
       const clone = element.cloneNode(true) as HTMLElement;
+      clone.className = ''; // Limpar todas as classes
       
-      // Remover classes que podem gerar cores LAB (dark mode, cores dinâmicas)
-      clone.classList.forEach(cls => {
-        if (cls.includes('dark:') || cls.includes('-900') || cls.includes('-800') || cls.includes('-700')) {
-          clone.classList.remove(cls);
-        }
+      // Remover classes de todos os filhos
+      const allElements = clone.querySelectorAll('*');
+      allElements.forEach((el: any) => {
+        el.className = '';
       });
       
-      // Aplicar estilos básicos inline
-      clone.style.backgroundColor = '#ffffff';
-      clone.style.color = '#000000';
+      // Aplicar estilos básicos inline a tudo
+      clone.style.cssText = 'background-color: #ffffff; color: #000000; font-family: Arial, sans-serif; padding: 20px;';
+      
+      // Aplicar estilos aos filhos
+      allElements.forEach((el: any) => {
+        const tagName = el.tagName.toLowerCase();
+        if (tagName === 'h3') {
+          el.style.cssText = 'font-size: 18px; font-weight: bold; margin: 15px 0 10px 0; color: #000000;';
+        } else if (tagName === 'p') {
+          el.style.cssText = 'margin: 5px 0; color: #000000; font-size: 14px;';
+        } else if (tagName === 'div') {
+          el.style.cssText = 'margin: 10px 0; color: #000000;';
+        }
+        // Garantir que nenhum elemento tenha classes
+        el.className = '';
+      });
       
       // Adicionar temporariamente ao DOM para capturar
       const tempContainer = document.createElement('div');
-      tempContainer.style.position = 'fixed';
-      tempContainer.style.left = '-10000px';
+      tempContainer.style.cssText = 'position: fixed; left: -10000px; top: 0; width: 800px; background: white;';
       tempContainer.appendChild(clone);
       document.body.appendChild(tempContainer);
+
+      // Aguardar um tick para garantir que estilos foram aplicados
+      await new Promise(resolve => setTimeout(resolve, 100));
 
       // Capturar o conteúdo em canvas
       const canvas = await html2canvas(clone, {
@@ -121,6 +136,7 @@ export default function RelatorioPage() {
         allowTaint: true,
         backgroundColor: '#ffffff',
         logging: false,
+        ignoreElements: (element) => element.tagName === 'BUTTON', // Ignorar botões
       });
       
       // Remover elemento temporário

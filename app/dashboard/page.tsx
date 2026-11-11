@@ -256,15 +256,23 @@ export default function DashboardPage() {
           </div>
         )}
 
-        {/* Add Expense Button */}
-        <Link
-          href="/adicionar-gasto"
-          className="group flex w-full py-4 sm:py-5 px-6 sm:px-8 bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-500 hover:to-primary-600 text-white font-black text-base sm:text-lg rounded-2xl transition-all duration-300 shadow-2xl shadow-primary-600/50 hover:shadow-2xl hover:shadow-primary-500/70 items-center justify-center gap-3 hover-lift transform hover:scale-105 active:scale-95"
-        >
-          <Plus size={24} strokeWidth={2.5} className="transition-transform group-hover:scale-125 group-hover:rotate-90" />
-          <span>Adicionar Despesa</span>
-          <ArrowRight size={20} strokeWidth={2.5} className="opacity-0 -ml-2 transition-all group-hover:opacity-100 group-hover:ml-1" />
-        </Link>
+        {/* Add Expense Button - CTA Hero */}
+        <div className="relative group mb-2">
+          {/* Glow Background */}
+          <div className="absolute inset-0 bg-gradient-to-r from-primary-600 to-primary-500 rounded-2xl opacity-0 group-hover:opacity-50 blur-xl transition-opacity duration-300"></div>
+          
+          {/* Button */}
+          <Link
+            href="/adicionar-gasto"
+            className="relative flex w-full py-5 sm:py-6 px-6 sm:px-8 bg-gradient-to-br from-primary-600 via-primary-600 to-primary-700 hover:from-primary-500 hover:via-primary-500 hover:to-primary-600 text-white font-black text-lg sm:text-xl rounded-2xl transition-all duration-300 shadow-2xl shadow-primary-600/60 hover:shadow-primary-600/80 items-center justify-center gap-3 active:scale-95 border-2 border-primary-500/50 hover:border-primary-400"
+          >
+            <Plus size={28} strokeWidth={2.5} className="transition-all group-hover:scale-125 group-hover:rotate-90" />
+            <span className="flex-1">Adicionar Despesa</span>
+            <div className="hidden sm:block">
+              <ArrowRight size={24} strokeWidth={2.5} className="transition-all group-hover:translate-x-2" />
+            </div>
+          </Link>
+        </div>
 
         {/* Transactions Section */}
         <div className="space-y-4">

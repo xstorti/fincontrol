@@ -3,6 +3,8 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { jsPDF } from 'jspdf';
+import html2canvas from 'html2canvas';
 import { User, Transaction } from '@/types';
 
 interface ReportData {
@@ -107,32 +109,67 @@ export default function RelatoriosPage() {
     URL.revokeObjectURL(url);
   };
 
-  const handleExportJSON = () => {
+  const handleExportPDF = async () => {
     if (!reportData) return;
 
-    const json = {
-      titulo: 'Relatório FinControl',
-      usuario: reportData.usuario,
-      periodo: {
-        inicio: dataInicio || 'Início',
-        fim: dataFim || 'Fim',
-      },
-      resumo: {
-        gasto_total: reportData.gasto_total,
-        saldo_atual: reportData.saldo_atual,
-        total_transacoes: reportData.transacoes.length,
-      },
-      transacoes: reportData.transacoes,
-      data_geracao: new Date().toISOString(),
-    };
+    try {
+      const element = document.getElementById('report-content');
+      if (!element) return;
 
-    const blob = new Blob([JSON.stringify(json, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `relatorio_${reportData.usuario.nome.replace(/\s+/g, '_')}_${new Date().getTime()}.json`;
-    a.click();
-    URL.revokeObjectURL(url);
+      // Capturar o conteúdo em canvas
+      const canvas = await html2canvas(element, {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: '#ffffff',
+      });
+
+      // Criar PDF
+      const pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4',
+      });
+
+      const imgData = canvas.toDataURL('image/png');
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = pdf.internal.pageSize.getHeight();
+      const imgWidth = pdfWidth - 20;
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+      let position = 10;
+
+      // Adicionar título
+      pdf.setFontSize(16);
+      pdf.setFont('Helvetica', 'bold');
+      pdf.text('Relatório FinControl', pdfWidth / 2, position, { align: 'center' });
+
+      position += 10;
+      pdf.setFontSize(10);
+      pdf.setFont('Helvetica', 'normal');
+      pdf.text(`Data: ${new Date().toLocaleDateString('pt-BR')}`, pdfWidth / 2, position, { align: 'center' });
+
+      position += 15;
+
+      // Adicionar conteúdo capturado
+      pdf.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
+
+      // Se a imagem for muito alta, adicionar em múltiplas páginas
+      let totalHeight = position + imgHeight;
+      while (totalHeight > pdfHeight) {
+        pdf.addPage();
+        position = 10;
+        totalHeight -= pdfHeight - 20;
+        pdf.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
+      }
+
+      // Salvar PDF
+      pdf.save(
+        `relatorio_${reportData.usuario.nome.replace(/\s+/g, '_')}_${new Date().getTime()}.pdf`
+      );
+    } catch (err) {
+      console.error('Erro ao gerar PDF:', err);
+      setError('Erro ao gerar PDF. Tente novamente.');
+    }
   };
 
   return (
@@ -220,7 +257,7 @@ export default function RelatoriosPage() {
         {reportData && (
           <div className="space-y-6">
             {/* Summary */}
-            <div className="bg-white dark:bg-neutral-800 rounded-lg shadow dark:shadow-dark-md p-6 space-y-4">
+            <div id="report-content" className="bg-white dark:bg-neutral-800 rounded-lg shadow dark:shadow-dark-md p-6 space-y-4">
               <h3 className="font-bold text-neutral-900 dark:text-neutral-100">Resumo</h3>
 
               <div className="grid grid-cols-2 gap-4">
@@ -266,10 +303,10 @@ export default function RelatoriosPage() {
                   📥 CSV
                 </button>
                 <button
-                  onClick={handleExportJSON}
+                  onClick={handleExportPDF}
                   className="flex-1 py-2 bg-primary-600 hover:bg-primary-700 dark:bg-primary-500 dark:hover:bg-primary-600 text-white font-semibold rounded-lg transition-colors text-sm"
                 >
-                  📥 JSON
+                  📄 PDF
                 </button>
               </div>
             </div>

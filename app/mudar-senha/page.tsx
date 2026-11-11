@@ -140,7 +140,7 @@ export default function MudarSenhaPage() {
                   Senha Atual
                 </label>
                 <div className="relative group">
-                  <Lock className="absolute left-4 top-4 w-5 h-5 text-neutral-500 transition-colors group-focus-within:text-primary-400" strokeWidth={2.5} />
+                  <Lock className="absolute left-4 top-4 w-5 h-5 text-neutral-500 transition-colors group-focus-within:text-primary-300" strokeWidth={2.5} />
                   <input
                     type={showPassword ? 'text' : 'password'}
                     placeholder="Digite sua senha atual"
@@ -169,7 +169,7 @@ export default function MudarSenhaPage() {
                   Nova Senha
                 </label>
                 <div className="relative group">
-                  <Lock className="absolute left-4 top-4 w-5 h-5 text-neutral-500 transition-colors group-focus-within:text-primary-400" strokeWidth={2.5} />
+                  <Lock className="absolute left-4 top-4 w-5 h-5 text-neutral-500 transition-colors group-focus-within:text-primary-300" strokeWidth={2.5} />
                   <input
                     type={showPassword ? 'text' : 'password'}
                     placeholder="Digite a nova senha"
@@ -189,7 +189,7 @@ export default function MudarSenhaPage() {
                   Confirme a Nova Senha
                 </label>
                 <div className="relative group">
-                  <Lock className="absolute left-4 top-4 w-5 h-5 text-neutral-500 transition-colors group-focus-within:text-primary-400" strokeWidth={2.5} />
+                  <Lock className="absolute left-4 top-4 w-5 h-5 text-neutral-500 transition-colors group-focus-within:text-primary-300" strokeWidth={2.5} />
                   <input
                     type={showPassword ? 'text' : 'password'}
                     placeholder="Confirme a nova senha"

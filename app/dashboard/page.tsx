@@ -195,7 +195,7 @@ export default function DashboardPage() {
                       <p className="text-xs text-green-200">Créditos acumulados</p>
                     </div>
                   </div>
-                  <p className="text-3xl sm:text-4xl font-black text-green-300">
+                  <p className="text-3xl sm:text-4xl font-black text-white">
                     R$ {kpi.credito_total.toFixed(2)}
                   </p>
                 </div>

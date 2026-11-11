@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { readCsv } from '@/lib/csv';
+import { supabaseAdmin } from '@/lib/supabase';
 import { comparePassword, generateToken } from '@/lib/auth';
 import { isValidEmail } from '@/lib/utils';
 import { createErrorResponse, createAuthResponse } from '@/lib/middleware';
@@ -19,13 +19,18 @@ export async function POST(req: NextRequest) {
       return createErrorResponse('Email inválido', 400);
     }
 
-    // Get users from CSV
-    const users = readCsv<User>('users.csv');
-    const user = users.find((u) => u.email === email && u.ativo);
+    // Get users from Supabase
+    const { data: users, error } = await supabaseAdmin
+      .from('users')
+      .select('*')
+      .eq('email', email)
+      .eq('ativo', true);
 
-    if (!user) {
+    if (error || !users || users.length === 0) {
       return createErrorResponse('Email ou senha incorretos', 401);
     }
+
+    const user = users[0];
 
     // Verify password
     const passwordMatch = await comparePassword(senha, user.senha_hash);
@@ -58,6 +63,16 @@ export async function POST(req: NextRequest) {
     response.cookies.set('auth_token', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 7 * 24 * 60 * 60, // 7 days
+    });
+
+    return response;
+  } catch (error) {
+    console.error('Login error:', error);
+    return createErrorResponse('Erro ao fazer login', 500);
+  }
+}
       sameSite: 'lax',
       maxAge: 7 * 24 * 60 * 60, // 7 days
       path: '/',

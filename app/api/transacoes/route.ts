@@ -135,11 +135,14 @@ export async function POST(req: NextRequest) {
     // Get email config from Supabase
     const { data: emailConfig } = await supabaseAdmin
       .from('email_config')
-      .select('email')
+      .select('email, notifica_despesa, ativo')
       .eq('notifica_despesa', true)
       .eq('ativo', true);
 
     const emailDestinarios = (emailConfig || []).map((e) => e.email);
+
+    let emailSent = false;
+    let emailError = null;
 
     // Send email notification (if configured)
     if (emailDestinarios.length > 0) {
@@ -155,19 +158,33 @@ export async function POST(req: NextRequest) {
         dias: 7,
       });
 
+      console.log('📧 Enviando notificação por email...');
+      console.log('Destinatários:', emailDestinarios);
+      console.log('API Key configurada:', !!process.env.RESEND_API_KEY);
+
       const emailResult = await sendEmail({
         to: emailDestinarios,
         subject: `Gasto registrado: ${descricao}`,
         html: emailHtml,
       });
 
+      if (emailResult.success) {
+        emailSent = true;
+        console.log('✅ Email enviado com sucesso');
+      } else {
+        emailError = emailResult.error;
+        console.log('❌ Erro ao enviar email:', emailError);
+      }
+
       // Update email_enviado flag if successful
-      if (emailResult.success && newTransaction[0].id) {
+      if (emailSent && newTransaction[0].id) {
         await supabaseAdmin
           .from('transactions')
           .update({ email_enviado: true })
           .eq('id', newTransaction[0].id);
       }
+    } else {
+      console.log('⚠️ Nenhum email configurado para notificações de despesas');
     }
 
     return NextResponse.json(
@@ -176,6 +193,11 @@ export async function POST(req: NextRequest) {
         data: {
           ...newTransaction[0],
           saldo_depois,
+        },
+        email: {
+          enviado: emailSent,
+          destinatarios: emailDestinarios,
+          erro: emailError,
         },
       },
       { status: 201 }

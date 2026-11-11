@@ -60,6 +60,7 @@ export async function GET(req: NextRequest) {
       saldo_atual,
       gasto_periodo: gastoPeriorod,
       media_dia: Math.round(media_dia * 100) / 100, // Round to 2 decimals
+      periodo_dias: dias,
     };
 
     return NextResponse.json(

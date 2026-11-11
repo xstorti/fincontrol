@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withAuth, createErrorResponse } from '@/lib/middleware';
-import { readCsv } from '@/lib/csv';
-import { calculateBalance } from '@/lib/kpi';
+import { supabaseAdmin } from '@/lib/supabase';
 import { Transaction, ApiResponse } from '@/types';
 
 interface UserReportData {
@@ -22,32 +21,51 @@ export async function GET(req: NextRequest) {
     const data_inicio = searchParams.get('data_inicio');
     const data_fim = searchParams.get('data_fim');
 
-    // Get transactions
-    const transactions = readCsv<Transaction>('transactions.csv');
-    let filteredTransactions = transactions.filter((t) => t.usuario_id === user.id && t.tipo === 'despesa');
+    // Build query for transactions
+    let query = supabaseAdmin
+      .from('transactions')
+      .select('*')
+      .eq('usuario_id', user.id)
+      .eq('tipo', 'despesa')
+      .order('data', { ascending: false });
 
-    // Apply date filters
+    // Apply date filters if provided
     if (data_inicio) {
-      const startDate = new Date(data_inicio);
-      filteredTransactions = filteredTransactions.filter((t) => new Date(t.data) >= startDate);
+      query = query.gte('data', data_inicio);
     }
 
     if (data_fim) {
-      const endDate = new Date(data_fim);
-      endDate.setHours(23, 59, 59, 999);
-      filteredTransactions = filteredTransactions.filter((t) => new Date(t.data) <= endDate);
+      query = query.lte('data', data_fim);
     }
 
-    // Sort by date descending
-    filteredTransactions.sort((a, b) => new Date(b.data).getTime() - new Date(a.data).getTime());
+    const { data: filteredTransactions, error: transError } = await query;
 
-    const gasto_total = filteredTransactions.reduce((sum, t) => sum + parseFloat(t.valor.toString()), 0);
-    const saldo_atual = calculateBalance(user.id);
+    if (transError) {
+      return createErrorResponse('Erro ao gerar relatório', 500);
+    }
+
+    // Calculate balance
+    const { data: credits } = await supabaseAdmin
+      .from('credits')
+      .select('valor')
+      .eq('usuario_id', user.id);
+
+    const { data: allExpenses } = await supabaseAdmin
+      .from('transactions')
+      .select('valor')
+      .eq('usuario_id', user.id)
+      .eq('tipo', 'despesa');
+
+    const totalCredito = (credits || []).reduce((sum, c) => sum + (c.valor || 0), 0);
+    const totalGasto = (allExpenses || []).reduce((sum, t) => sum + (t.valor || 0), 0);
+    const saldo_atual = totalCredito - totalGasto;
+
+    const gasto_total = (filteredTransactions || []).reduce((sum, t) => sum + (t.valor || 0), 0);
 
     const report: UserReportData = {
       gasto_total,
       saldo_atual,
-      transacoes: filteredTransactions,
+      transacoes: filteredTransactions || [],
     };
 
     return NextResponse.json(

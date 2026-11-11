@@ -57,11 +57,16 @@ export async function POST(req: NextRequest) {
     }
 
     // Check if email already exists
-    const { data: existingEmail } = await supabaseAdmin
+    const { data: existingEmail, error: checkError } = await supabaseAdmin
       .from('email_config')
       .select('email')
       .eq('email', email)
-      .single();
+      .maybeSingle();
+
+    if (checkError) {
+      console.error('Check email error:', checkError);
+      return createErrorResponse('Erro ao verificar email', 500);
+    }
 
     if (existingEmail) {
       return createErrorResponse('Email já cadastrado', 400);
@@ -165,14 +170,26 @@ export async function DELETE(req: NextRequest) {
       return createErrorResponse('Email é obrigatório', 400);
     }
 
+    // Check if email exists before deleting
+    const { data: existingEmail } = await supabaseAdmin
+      .from('email_config')
+      .select('email')
+      .eq('email', email)
+      .maybeSingle();
+
+    if (!existingEmail) {
+      return createErrorResponse('Email não encontrado', 404);
+    }
+
     // Delete from Supabase
-    const { error: deleteError, count } = await supabaseAdmin
+    const { error: deleteError } = await supabaseAdmin
       .from('email_config')
       .delete()
       .eq('email', email);
 
-    if (deleteError || !count || count === 0) {
-      return createErrorResponse('Email não encontrado', 404);
+    if (deleteError) {
+      console.error('Delete error:', deleteError);
+      return createErrorResponse('Erro ao remover email', 500);
     }
 
     return NextResponse.json(

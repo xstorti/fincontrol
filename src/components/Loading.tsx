@@ -1,9 +1,11 @@
+'use client';
+
 export function LoadingSpinner() {
   return (
-    <div className="flex items-center justify-center min-h-screen">
+    <div className="flex items-center justify-center min-h-screen bg-neutral-50 dark:bg-neutral-900">
       <div className="text-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-4"></div>
-        <p className="text-gray-600">Carregando...</p>
+        <div className="animate-spin rounded-full h-16 w-16 border-4 border-neutral-200 dark:border-neutral-700 border-t-primary-500 mx-auto mb-6"></div>
+        <p className="text-neutral-600 dark:text-neutral-400 text-lg font-medium">Carregando...</p>
       </div>
     </div>
   );
@@ -24,7 +26,9 @@ export function LoadingButton({
       {...props}
       className={`flex items-center justify-center gap-2 ${props.className || ''}`}
     >
-      {loading && <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full"></div>}
+      {loading && (
+        <div className="animate-spin w-4 h-4 border-2 border-white dark:border-neutral-800 border-t-transparent rounded-full"></div>
+      )}
       {children}
     </button>
   );
@@ -33,16 +37,16 @@ export function LoadingButton({
 export function Skeleton({ className = '' }: { className?: string }) {
   return (
     <div
-      className={`bg-gray-200 animate-pulse rounded ${className}`}
+      className={`bg-neutral-200 dark:bg-neutral-700 animate-pulse rounded-md ${className}`}
     />
   );
 }
 
 export function SkeletonList({ count = 5 }: { count?: number }) {
   return (
-    <div className="space-y-3">
+    <div className="space-y-4">
       {Array.from({ length: count }).map((_, i) => (
-        <Skeleton key={i} className="h-16 w-full" />
+        <Skeleton key={i} className="h-20 w-full" />
       ))}
     </div>
   );

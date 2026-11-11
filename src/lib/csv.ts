@@ -23,10 +23,63 @@ function getFilePath(filename: string): string {
 }
 
 /**
+ * Initialize default data
+ */
+function initializeDefaultData(): void {
+  const usersPath = getFilePath('users.csv');
+  
+  if (!fs.existsSync(usersPath)) {
+    const usersData = `id,nome,email,senha_hash,tipo_usuario,criado_em,ativo
+1,Pai,pai@familia.com,$2b$10$ykD0fw1U/L1sZGXy.D8Wy.aI9.vWqM1Y8yYvNqSJxZK9OJzGhAZsm,admin,2026-01-01T00:00:00Z,true
+2,Mãe,mae@familia.com,$2b$10$XChpaRCtA4Gv7FfLKnZXDu0HkW2VyKzH8pJ.QzN9zGh7KcZvZ7J9C,admin,2026-01-01T00:00:00Z,true
+3,Filha,filha@familia.com,$2b$10$hDJGX0gck2.N5T1QzU6p.OzW8iE7R9Q3M1L5V4S7P8X2B9C1D4E5,user,2026-01-01T00:00:00Z,true`;
+    
+    fs.writeFileSync(usersPath, usersData, 'utf-8');
+  }
+
+  const creditsPath = getFilePath('credits.csv');
+  if (!fs.existsSync(creditsPath)) {
+    const creditsData = `usuario_id,data_creditada,valor,descricao,admin_que_adicionou,criado_em
+3,2026-01-01,10000.00,Mesada Inicial,1,2026-01-01T00:00:00Z`;
+    fs.writeFileSync(creditsPath, creditsData, 'utf-8');
+  }
+
+  const transactionsPath = getFilePath('transactions.csv');
+  if (!fs.existsSync(transactionsPath)) {
+    const transactionsData = `id,usuario_id,data,descricao,valor,tipo,criado_em,email_enviado
+1,3,2026-01-01,Lanche,45.50,despesa,2026-01-01T00:00:00Z,false`;
+    fs.writeFileSync(transactionsPath, transactionsData, 'utf-8');
+  }
+
+  const emailConfigPath = getFilePath('email_config.json');
+  if (!fs.existsSync(emailConfigPath)) {
+    const emailConfig = {
+      destinatarios: [
+        {
+          email: 'pai@familia.com',
+          notifica_despesa: true,
+          notifica_credito: true,
+          ativo: true,
+        },
+        {
+          email: 'mae@familia.com',
+          notifica_despesa: true,
+          notifica_credito: true,
+          ativo: true,
+        },
+      ],
+    };
+    fs.writeFileSync(emailConfigPath, JSON.stringify(emailConfig, null, 2), 'utf-8');
+  }
+}
+
+/**
  * Read CSV file and return array of objects
  */
 export function readCsv<T>(filename: string): T[] {
   try {
+    initializeDefaultData();
+    
     const filePath = getFilePath(filename);
     if (!fs.existsSync(filePath)) {
       return [];

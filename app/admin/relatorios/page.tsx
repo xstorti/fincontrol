@@ -369,13 +369,37 @@ export default function RelatoriosPage() {
               <div className="flex gap-2 pt-4">
                 <button
                   onClick={handleExportCSV}
-                  className="!bg-success-600 hover:!bg-success-700 dark:!bg-success-500 dark:hover:!bg-success-600 flex-1 py-2 text-white font-semibold rounded-lg transition-colors text-sm"
+                  style={{
+                    backgroundColor: '#16a34a',
+                    color: '#ffffff',
+                    padding: '8px 16px',
+                    borderRadius: '8px',
+                    border: 'none',
+                    fontWeight: '600',
+                    cursor: 'pointer',
+                    fontSize: '14px',
+                    flex: 1,
+                  }}
+                  onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#15803d')}
+                  onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#16a34a')}
                 >
                   📚 CSV
                 </button>
                 <button
                   onClick={handleExportPDF}
-                  className="!bg-danger-600 hover:!bg-danger-700 dark:!bg-danger-500 dark:hover:!bg-danger-600 flex-1 py-2 text-white font-semibold rounded-lg transition-colors text-sm"
+                  style={{
+                    backgroundColor: '#dc2626',
+                    color: '#ffffff',
+                    padding: '8px 16px',
+                    borderRadius: '8px',
+                    border: 'none',
+                    fontWeight: '600',
+                    cursor: 'pointer',
+                    fontSize: '14px',
+                    flex: 1,
+                  }}
+                  onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#b91c1c')}
+                  onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#dc2626')}
                 >
                   📄 PDF
                 </button>

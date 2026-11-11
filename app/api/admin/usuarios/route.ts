@@ -87,13 +87,23 @@ export async function POST(req: NextRequest) {
           senha_hash: senhaHash,
           tipo_usuario,
           ativo: true,
+          criado_em: new Date().toISOString(),
         },
       ])
       .select();
 
-    if (insertError || !newUser || newUser.length === 0) {
-      console.error('Insert error:', insertError);
-      return createErrorResponse('Erro ao criar usuário', 500);
+    if (insertError) {
+      console.error('Insert error details:', {
+        message: insertError.message,
+        code: insertError.code,
+        details: insertError.details,
+      });
+      return createErrorResponse(`Erro ao criar usuário: ${insertError.message}`, 500);
+    }
+
+    if (!newUser || newUser.length === 0) {
+      console.error('No user returned after insert');
+      return createErrorResponse('Erro ao criar usuário: resposta vazia', 500);
     }
 
     return NextResponse.json(
@@ -112,7 +122,8 @@ export async function POST(req: NextRequest) {
       { status: 201 }
     );
   } catch (error: any) {
-    console.error('Create user error:', error);
-    return createErrorResponse('Erro ao criar usuário', 500);
+    console.error('Create user error:', error.message || error);
+    console.error('Full error:', error);
+    return createErrorResponse(`Erro ao criar usuário: ${error.message}`, 500);
   }
 }

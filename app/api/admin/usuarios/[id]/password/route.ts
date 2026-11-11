@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 
 const supabase = createClient(
@@ -20,11 +21,9 @@ export async function POST(
 
     // Verify JWT
     const secret = process.env.JWT_SECRET;
-    const { jwtVerify } = await import('jose');
     let decoded: any;
     try {
-      const verified = await jwtVerify(token, new TextEncoder().encode(secret!));
-      decoded = verified.payload;
+      decoded = jwt.verify(token, secret!) as any;
     } catch {
       return NextResponse.json({ error: 'Token inválido' }, { status: 401 });
     }

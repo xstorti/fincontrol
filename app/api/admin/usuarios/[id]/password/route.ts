@@ -10,9 +10,11 @@ const supabase = createClient(
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
+    
     // Verify JWT token
     const token = request.headers.get('authorization')?.split(' ')[1];
     if (!token) {
@@ -64,7 +66,7 @@ export async function POST(
         senha_hash: senhaHash,
         senha_temporaria: gerar_temporaria ? true : false,
       })
-      .eq('id', params.id);
+      .eq('id', id);
 
     if (updateError) {
       console.error('Update error:', updateError);
@@ -74,7 +76,7 @@ export async function POST(
     return NextResponse.json({
       message: 'Senha alterada com sucesso',
       data: {
-        usuario_id: params.id,
+        usuario_id: id,
         senha_temporaria: gerar_temporaria ? true : false,
         temp_password: tempPassword, // Return generated password if created
       },

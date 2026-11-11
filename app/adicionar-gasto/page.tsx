@@ -65,12 +65,12 @@ export default function AdicionarGastoPage() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-gray-50">
+    <div className="flex flex-col min-h-screen bg-neutral-50 dark:bg-neutral-900">
       {/* Header */}
-      <header className="bg-white border-b border-gray-200 sticky top-0 z-10">
+      <header className="bg-white dark:bg-neutral-800 border-b border-neutral-200 dark:border-neutral-700 sticky top-0 z-10">
         <div className="max-w-md mx-auto px-4 py-4 flex items-center justify-between">
-          <h1 className="text-xl font-bold text-green-700">💰 FinControl</h1>
-          <Link href="/dashboard" className="text-gray-600 hover:text-gray-800">
+          <h1 className="text-xl font-bold text-primary-600 dark:text-primary-400">💰 FinControl</h1>
+          <Link href="/dashboard" className="text-neutral-600 dark:text-neutral-400 hover:text-neutral-800 dark:hover:text-neutral-200">
             ✕
           </Link>
         </div>
@@ -78,7 +78,7 @@ export default function AdicionarGastoPage() {
 
       {/* Main Content */}
       <main className="flex-1 max-w-md mx-auto w-full px-4 py-8">
-        <h2 className="text-2xl font-bold text-gray-800 mb-6">Adicionar Gasto</h2>
+        <h2 className="text-2xl font-bold text-neutral-900 dark:text-neutral-100 mb-6">Adicionar Gasto</h2>
 
         {/* Success Alert */}
         {success && <SuccessAlert message="Gasto adicionado!" details="Redirecionando para o dashboard..." />}
@@ -87,10 +87,10 @@ export default function AdicionarGastoPage() {
         {error && <ErrorAlert message="Erro ao adicionar gasto" details={error} />}
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="space-y-6 bg-white rounded-lg shadow p-6">
+        <form onSubmit={handleSubmit} className="space-y-6 bg-white dark:bg-neutral-800 rounded-lg shadow dark:shadow-dark-md p-6">
           {/* Data */}
           <div>
-            <label htmlFor="data" className="block text-sm font-medium text-gray-700 mb-2">
+            <label htmlFor="data" className="block text-sm font-medium text-neutral-900 dark:text-neutral-100 mb-2">
               Data *
             </label>
             <input
@@ -100,13 +100,13 @@ export default function AdicionarGastoPage() {
               onChange={(e) => setData(e.target.value)}
               max={maxDate}
               required
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+              className="w-full px-4 py-3 border border-neutral-300 dark:border-neutral-600 bg-white dark:bg-neutral-700 text-neutral-900 dark:text-neutral-100 placeholder-neutral-500 dark:placeholder-neutral-400 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:focus:ring-primary-400"
             />
           </div>
 
           {/* Descrição */}
           <div>
-            <label htmlFor="descricao" className="block text-sm font-medium text-gray-700 mb-2">
+            <label htmlFor="descricao" className="block text-sm font-medium text-neutral-900 dark:text-neutral-100 mb-2">
               Descrição *
             </label>
             <textarea
@@ -118,20 +118,20 @@ export default function AdicionarGastoPage() {
               minLength={3}
               maxLength={100}
               rows={3}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 resize-none"
+              className="w-full px-4 py-3 border border-neutral-300 dark:border-neutral-600 bg-white dark:bg-neutral-700 text-neutral-900 dark:text-neutral-100 placeholder-neutral-500 dark:placeholder-neutral-400 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:focus:ring-primary-400 resize-none"
             />
-            <p className="text-xs text-gray-500 mt-1">
+            <p className="text-xs text-neutral-600 dark:text-neutral-400 mt-1">
               {descricao.length}/100 caracteres
             </p>
           </div>
 
           {/* Valor */}
           <div>
-            <label htmlFor="valor" className="block text-sm font-medium text-gray-700 mb-2">
+            <label htmlFor="valor" className="block text-sm font-medium text-neutral-900 dark:text-neutral-100 mb-2">
               Valor (R$) *
             </label>
             <div className="relative">
-              <span className="absolute left-3 top-3 text-gray-700 font-semibold">R$</span>
+              <span className="absolute left-3 top-3 text-neutral-600 dark:text-neutral-400 font-semibold">R$</span>
               <input
                 id="valor"
                 type="number"
@@ -141,7 +141,7 @@ export default function AdicionarGastoPage() {
                 step="0.01"
                 min="0"
                 required
-                className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                className="w-full pl-12 pr-4 py-3 border border-neutral-300 dark:border-neutral-600 bg-white dark:bg-neutral-700 text-neutral-900 dark:text-neutral-100 placeholder-neutral-500 dark:placeholder-neutral-400 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:focus:ring-primary-400"
               />
             </div>
           </div>

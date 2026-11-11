@@ -2,23 +2,5 @@
   "buildCommand": "npm run build",
   "installCommand": "npm install",
   "devCommand": "npm run dev",
-  "framework": "nextjs",
-  "env": [
-    {
-      "key": "RESEND_API_KEY",
-      "description": "API Key da Resend para envio de emails (obrigatório)"
-    },
-    {
-      "key": "JWT_SECRET",
-      "description": "Chave secreta para assinar JWTs - use uma string aleatória de 32+ caracteres"
-    },
-    {
-      "key": "ADMIN_EMAIL",
-      "description": "Email do administrador principal para notificações"
-    },
-    {
-      "key": "NEXT_PUBLIC_APP_URL",
-      "description": "URL base da aplicação em produção (ex: https://fincontrol.vercel.app)"
-    }
-  ]
+  "framework": "nextjs"
 }

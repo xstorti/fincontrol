@@ -77,15 +77,26 @@ export async function POST(req: NextRequest) {
     const tempPassword = generateTemporaryPassword();
     const senhaHash = await hashPassword(tempPassword);
 
-    // Generate UUID for new user
-    const newUserId = crypto.randomUUID();
+    // Get the highest ID and generate next one
+    const { data: users, error: maxIdError } = await supabaseAdmin
+      .from('users')
+      .select('id')
+      .order('id', { ascending: false })
+      .limit(1);
+
+    if (maxIdError) {
+      console.error('Error getting max id:', maxIdError);
+      return createErrorResponse('Erro ao gerar ID de usuário', 500);
+    }
+
+    const nextId = (users && users.length > 0 ? Math.max(...users.map(u => typeof u.id === 'string' ? parseInt(u.id) : u.id)) : 0) + 1;
 
     // Create new user in Supabase
     const { data: newUser, error: insertError } = await supabaseAdmin
       .from('users')
       .insert([
         {
-          id: newUserId,
+          id: nextId,
           nome,
           email,
           senha_hash: senhaHash,

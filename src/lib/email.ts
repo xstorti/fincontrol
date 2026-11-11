@@ -1,6 +1,6 @@
-import { Resend } from 'resend';
+import sgMail from '@sendgrid/mail';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+sgMail.setApiKey(process.env.SENDGRID_API_KEY || '');
 
 interface EmailParams {
   to: string | string[];
@@ -10,7 +10,7 @@ interface EmailParams {
 }
 
 /**
- * Send email using Resend
+ * Send email using SendGrid
  */
 export async function sendEmail({
   to,
@@ -19,27 +19,22 @@ export async function sendEmail({
   replyTo,
 }: EmailParams): Promise<{ success: boolean; error?: string }> {
   try {
-    if (!process.env.RESEND_API_KEY) {
-      console.warn('RESEND_API_KEY not configured. Email not sent.');
+    if (!process.env.SENDGRID_API_KEY) {
+      console.warn('SENDGRID_API_KEY not configured. Email not sent.');
       return { success: false, error: 'Email service not configured' };
     }
 
-    const response = await resend.emails.send({
-      from: process.env.ADMIN_EMAIL || 'noreply@fincontrol.com',
+    await sgMail.send({
       to: Array.isArray(to) ? to : [to],
+      from: process.env.ADMIN_EMAIL || 'noreply@fincontrol.com',
       subject,
       html,
       replyTo,
     });
 
-    if (response.error) {
-      console.error('Resend error:', response.error);
-      return { success: false, error: response.error.message };
-    }
-
     return { success: true };
   } catch (error: any) {
-    console.error('Error sending email:', error);
+    console.error('SendGrid error:', error);
     return { success: false, error: error.message };
   }
 }

@@ -43,24 +43,62 @@ export async function GET(req: NextRequest) {
     // Get transactions in period
     const { data: transacoesPeriodo } = await supabaseAdmin
       .from('transactions')
-      .select('valor')
+      .select('valor, data')
       .eq('usuario_id', parseInt(usuario_id))
       .eq('tipo', 'despesa')
       .gte('data', dataInicioStr);
+
+    // Get transactions from previous period (for variation calculation)
+    const dataInicioAnterior = new Date();
+    dataInicioAnterior.setDate(dataInicioAnterior.getDate() - dias * 2);
+    const dataFimAnterior = new Date();
+    dataFimAnterior.setDate(dataFimAnterior.getDate() - dias);
+    const dataFimAnteriorStr = dataFimAnterior.toISOString().split('T')[0];
+    const dataInicioAnteriorStr = dataInicioAnterior.toISOString().split('T')[0];
+
+    const { data: transacoesPeriodoAnterior } = await supabaseAdmin
+      .from('transactions')
+      .select('valor')
+      .eq('usuario_id', parseInt(usuario_id))
+      .eq('tipo', 'despesa')
+      .gte('data', dataInicioAnteriorStr)
+      .lt('data', dataFimAnteriorStr);
 
     // Calculate totals
     const totalCredito = (credits || []).reduce((sum, c) => sum + (c.valor || 0), 0);
     const totalGasto = (transactions || []).reduce((sum, t) => sum + (t.valor || 0), 0);
     const gastoPeriorod = (transacoesPeriodo || []).reduce((sum, t) => sum + (t.valor || 0), 0);
+    const gastoPeriodoAnterior = (transacoesPeriodoAnterior || []).reduce((sum, t) => sum + (t.valor || 0), 0);
     
     const saldo_atual = totalCredito - totalGasto;
     const media_dia = dias > 0 ? gastoPeriorod / dias : 0;
 
+    // Calculate variation percentage
+    const variacao_percentual = gastoPeriodoAnterior > 0 
+      ? ((gastoPeriorod - gastoPeriodoAnterior) / gastoPeriodoAnterior) * 100
+      : 0;
+
+    // Build daily history for sparkline
+    const historioDiario: { data: string; valor: number }[] = [];
+    for (let i = dias - 1; i >= 0; i--) {
+      const dia = new Date();
+      dia.setDate(dia.getDate() - i);
+      const diaStr = dia.toISOString().split('T')[0];
+      const gastoNoDia = (transacoesPeriodo || [])
+        .filter(t => (t.data as string).split('T')[0] === diaStr)
+        .reduce((sum, t) => sum + (t.valor || 0), 0);
+      historioDiario.push({ data: diaStr, valor: gastoNoDia });
+    }
+
     const kpi: KPI = {
       saldo_atual,
+      credito_total: totalCredito,
+      gasto_total: totalGasto,
       gasto_periodo: gastoPeriorod,
-      media_dia: Math.round(media_dia * 100) / 100, // Round to 2 decimals
+      media_dia: Math.round(media_dia * 100) / 100,
       periodo_dias: dias,
+      variacao_percentual: Math.round(variacao_percentual * 100) / 100,
+      historico_diario: historioDiario,
     };
 
     return NextResponse.json(

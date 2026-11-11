@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { LoadingSpinner, ErrorAlert, SkeletonList } from '@/components';
 import { KPI, Transaction, User } from '@/types';
 import { Plus, TrendingDown, TrendingUp, BarChart3, Settings, LogOut, ArrowRight } from 'lucide-react';
+import { LineChart, Line, ResponsiveContainer } from 'recharts';
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -105,18 +106,66 @@ export default function DashboardPage() {
           <div className="space-y-4 sm:space-y-6 lg:space-y-6">
             {/* Main Balance Card - Premium */}
             <div className="group relative">
-              <div className="absolute inset-0 bg-gradient-to-r from-primary-500/20 to-secondary-500/20 rounded-3xl blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-              <div className="relative bg-gradient-to-br from-primary-600 to-primary-800 dark:from-primary-700 dark:to-primary-900 rounded-3xl shadow-2xl p-4 sm:p-6 lg:p-8 text-white border border-primary-500/20">
+              <div className={`absolute inset-0 rounded-3xl blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 ${
+                kpi.saldo_atual >= 0 
+                  ? 'bg-gradient-to-r from-emerald-500/20 to-green-500/20'
+                  : 'bg-gradient-to-r from-red-500/20 to-rose-500/20'
+              }`}></div>
+              <div className={`relative rounded-3xl shadow-2xl p-4 sm:p-6 lg:p-8 text-white border transition-all duration-300 ${
+                kpi.saldo_atual >= 0
+                  ? 'bg-gradient-to-br from-emerald-600 to-green-800 dark:from-emerald-700 dark:to-green-900 border-emerald-500/20'
+                  : 'bg-gradient-to-br from-red-600 to-rose-800 dark:from-red-700 dark:to-rose-900 border-red-500/20'
+              }`}>
                 <div className="flex items-start justify-between mb-6">
                   <div>
-                    <p className="text-primary-100 text-sm font-bold uppercase tracking-wide mb-2">Saldo Atual</p>
+                    <p className={`text-sm font-bold uppercase tracking-wide mb-2 ${
+                      kpi.saldo_atual >= 0 ? 'text-emerald-100' : 'text-red-100'
+                    }`}>Saldo Atual</p>
                     <p className="text-3xl sm:text-4xl lg:text-5xl font-black">
                       R$ {Math.abs(kpi.saldo_atual).toFixed(2)}
                     </p>
+                    {kpi.variacao_percentual !== undefined && (
+                      <div className="mt-3 flex items-center gap-2">
+                        {kpi.variacao_percentual > 0 ? (
+                          <>
+                            <TrendingDown className="w-4 h-4" />
+                            <span className="text-sm font-semibold">+{kpi.variacao_percentual.toFixed(1)}% vs período anterior</span>
+                          </>
+                        ) : kpi.variacao_percentual < 0 ? (
+                          <>
+                            <TrendingUp className="w-4 h-4" />
+                            <span className="text-sm font-semibold">{kpi.variacao_percentual.toFixed(1)}% vs período anterior</span>
+                          </>
+                        ) : (
+                          <span className="text-sm font-semibold">Sem variação</span>
+                        )}
+                      </div>
+                    )}
                   </div>
-                  <div className="text-3xl">💳</div>
+                  <div className="text-3xl">{kpi.saldo_atual >= 0 ? '💚' : '📉'}</div>
                 </div>
-                <div className="flex items-center gap-2 text-primary-100 text-sm font-medium">
+
+                {/* Sparkline */}
+                {kpi.historico_diario && kpi.historico_diario.length > 0 && (
+                  <div className="mt-6 pt-4 border-t border-white/20">
+                    <ResponsiveContainer width="100%" height={40}>
+                      <LineChart data={kpi.historico_diario}>
+                        <Line 
+                          type="monotone" 
+                          dataKey="valor" 
+                          stroke="currentColor"
+                          strokeWidth={2}
+                          dot={false} 
+                          isAnimationActive={false}
+                        />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
+                )}
+
+                <div className={`flex items-center gap-2 mt-6 text-sm font-medium ${
+                  kpi.saldo_atual >= 0 ? 'text-emerald-100' : 'text-red-100'
+                }`}>
                   {kpi.saldo_atual >= 0 ? (
                     <>
                       <TrendingUp size={16} />
@@ -131,6 +180,27 @@ export default function DashboardPage() {
                 </div>
               </div>
             </div>
+
+            {/* Receitas Card - If there are credits */}
+            {kpi.credito_total && kpi.credito_total > 0 && (
+              <div className="group relative">
+                <div className="absolute inset-0 bg-gradient-to-r from-green-500/20 to-emerald-500/20 rounded-3xl blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                <div className="relative bg-gradient-to-br from-green-600 to-emerald-800 dark:from-green-700 dark:to-emerald-900 rounded-3xl shadow-2xl p-4 sm:p-6 lg:p-8 text-white border border-green-500/20">
+                  <div className="flex items-center gap-4 mb-4">
+                    <div className="p-3 bg-green-500/20 rounded-lg">
+                      <TrendingUp className="w-6 h-6 text-green-300" strokeWidth={2.5} />
+                    </div>
+                    <div>
+                      <p className="text-xs font-bold uppercase tracking-wide text-green-100">Receita Total</p>
+                      <p className="text-xs text-green-200">Créditos acumulados</p>
+                    </div>
+                  </div>
+                  <p className="text-3xl sm:text-4xl font-black text-green-300">
+                    R$ {kpi.credito_total.toFixed(2)}
+                  </p>
+                </div>
+              </div>
+            )}
 
             {/* Period Selector */}
             <div className="bg-neutral-800/50 backdrop-blur-sm rounded-2xl border border-neutral-700/50 p-4">
@@ -152,33 +222,33 @@ export default function DashboardPage() {
             {/* Stats Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {/* Expenses */}
-              <div className="group bg-neutral-800/50 dark:bg-neutral-800/50 backdrop-blur-sm rounded-2xl border border-neutral-700/50 hover:border-danger-500/50 p-4 sm:p-5 lg:p-6 transition-all duration-300 hover-lift">
+              <div className="group bg-neutral-800/50 dark:bg-neutral-800/50 backdrop-blur-sm rounded-2xl border border-neutral-700/50 hover:border-red-500/50 p-4 sm:p-5 lg:p-6 transition-all duration-300 hover-lift">
                 <div className="flex items-center gap-4 mb-4">
-                  <div className="p-3 bg-danger-500/10 rounded-lg group-hover:bg-danger-500/20 transition-colors">
-                    <TrendingDown className="w-6 h-6 text-danger-400" />
+                  <div className="p-3 bg-red-500/10 group-hover:bg-red-500/20 rounded-lg transition-colors">
+                    <TrendingDown className="w-6 h-6 text-red-400" strokeWidth={2.5} />
                   </div>
                   <div>
                     <p className="text-xs font-bold uppercase tracking-wide text-neutral-400">Despesa Total</p>
                     <p className="text-xs text-neutral-500">{dias} dias</p>
                   </div>
                 </div>
-                <p className="text-2xl sm:text-3xl font-black text-danger-400">
+                <p className="text-2xl sm:text-3xl font-black" style={{ color: '#EF4444' }}>
                   R$ {kpi.gasto_periodo.toFixed(2)}
                 </p>
               </div>
 
               {/* Average per day */}
-              <div className="group bg-neutral-800/50 dark:bg-neutral-800/50 backdrop-blur-sm rounded-2xl border border-neutral-700/50 hover:border-warning-500/50 p-4 sm:p-5 lg:p-6 transition-all duration-300 hover-lift">
+              <div className="group bg-neutral-800/50 dark:bg-neutral-800/50 backdrop-blur-sm rounded-2xl border border-neutral-700/50 hover:border-amber-500/50 p-4 sm:p-5 lg:p-6 transition-all duration-300 hover-lift">
                 <div className="flex items-center gap-4 mb-4">
-                  <div className="p-3 bg-warning-500/10 rounded-lg group-hover:bg-warning-500/20 transition-colors">
-                    <BarChart3 className="w-6 h-6 text-warning-400" />
+                  <div className="p-3 bg-amber-500/10 group-hover:bg-amber-500/20 rounded-lg transition-colors">
+                    <BarChart3 className="w-6 h-6 text-amber-400" strokeWidth={2.5} />
                   </div>
                   <div>
                     <p className="text-xs font-bold uppercase tracking-wide text-neutral-400">Média Diária</p>
                     <p className="text-xs text-neutral-500">por dia</p>
                   </div>
                 </div>
-                <p className="text-2xl sm:text-3xl font-black text-warning-400">
+                <p className="text-2xl sm:text-3xl font-black text-amber-400">
                   R$ {kpi.media_dia.toFixed(2)}
                 </p>
               </div>
@@ -191,9 +261,9 @@ export default function DashboardPage() {
           href="/adicionar-gasto"
           className="group flex w-full py-3 sm:py-4 px-4 sm:px-6 bg-gradient-to-r from-primary-600 to-secondary-600 hover:from-primary-500 hover:to-secondary-500 text-white font-bold text-sm sm:text-base rounded-xl transition-all duration-300 shadow-lg shadow-primary-500/30 hover:shadow-xl hover:shadow-primary-500/40 items-center justify-center gap-3 hover-lift"
         >
-          <Plus size={20} className="transition-transform group-hover:scale-110" />
+          <Plus size={20} strokeWidth={2.5} className="transition-transform group-hover:scale-110" />
           <span>Adicionar Despesa</span>
-          <ArrowRight size={18} className="opacity-0 -ml-2 transition-all group-hover:opacity-100 group-hover:ml-0" />
+          <ArrowRight size={18} strokeWidth={2.5} className="opacity-0 -ml-2 transition-all group-hover:opacity-100 group-hover:ml-0" />
         </Link>
 
         {/* Transactions Section */}
@@ -241,7 +311,7 @@ export default function DashboardPage() {
             href="/relatorio"
             className="group flex items-center justify-center gap-2 py-4 px-6 bg-neutral-800/50 hover:bg-neutral-700/50 border border-neutral-700/50 hover:border-primary-500/50 text-primary-400 hover:text-primary-300 font-bold rounded-xl transition-all duration-300 hover-lift"
           >
-            <BarChart3 size={20} />
+            <BarChart3 size={20} strokeWidth={2.5} />
             <span>Relatório</span>
           </Link>
           {user?.tipo_usuario === 'admin' && (
@@ -249,7 +319,7 @@ export default function DashboardPage() {
               href="/admin"
               className="group flex items-center justify-center gap-2 py-4 px-6 bg-neutral-800/50 hover:bg-neutral-700/50 border border-neutral-700/50 hover:border-secondary-500/50 text-secondary-400 hover:text-secondary-300 font-bold rounded-xl transition-all duration-300 hover-lift"
             >
-              <Settings size={20} />
+              <Settings size={20} strokeWidth={2.5} />
               <span>Painel Admin</span>
             </Link>
           )}

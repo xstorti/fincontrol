@@ -44,9 +44,13 @@ export interface EmailConfig {
 // KPI type
 export interface KPI {
   saldo_atual: number;
+  credito_total?: number;
+  gasto_total?: number;
   gasto_periodo: number;
   media_dia: number;
   periodo_dias: number;
+  variacao_percentual?: number;
+  historico_diario?: { data: string; valor: number }[];
 }
 
 // Auth payload

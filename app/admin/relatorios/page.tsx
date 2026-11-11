@@ -116,14 +116,38 @@ export default function RelatoriosPage() {
       const element = document.getElementById('report-content');
       if (!element) return;
 
-      // Capturar o conteúdo em canvas com opções para suportar cores modernas
-      const canvas = await html2canvas(element, {
+      // Criar um clone sem classes dinâmicas para evitar erro com cores LAB
+      const clone = element.cloneNode(true) as HTMLElement;
+      
+      // Remover classes que podem gerar cores LAB (dark mode, cores dinâmicas)
+      clone.classList.forEach(cls => {
+        if (cls.includes('dark:') || cls.includes('-900') || cls.includes('-800') || cls.includes('-700')) {
+          clone.classList.remove(cls);
+        }
+      });
+      
+      // Aplicar estilos básicos inline
+      clone.style.backgroundColor = '#ffffff';
+      clone.style.color = '#000000';
+      
+      // Adicionar temporariamente ao DOM para capturar
+      const tempContainer = document.createElement('div');
+      tempContainer.style.position = 'fixed';
+      tempContainer.style.left = '-10000px';
+      tempContainer.appendChild(clone);
+      document.body.appendChild(tempContainer);
+
+      // Capturar o conteúdo em canvas
+      const canvas = await html2canvas(clone, {
         scale: 2,
         useCORS: true,
         allowTaint: true,
         backgroundColor: '#ffffff',
         logging: false,
       });
+      
+      // Remover elemento temporário
+      document.body.removeChild(tempContainer);
 
       // Criar PDF
       const pdf = new jsPDF({
@@ -247,7 +271,7 @@ export default function RelatoriosPage() {
 
               <button
                 onClick={handleGenerateReport}
-                className="w-full py-2 bg-primary-600 hover:bg-primary-700 dark:bg-primary-500 dark:hover:bg-primary-600 text-white font-semibold rounded-lg transition-colors"
+                className="w-full py-2 bg-neutral-600 hover:bg-neutral-700 dark:bg-neutral-700 dark:hover:bg-neutral-600 text-white font-semibold rounded-lg transition-colors"
               >
                 Gerar Relatório
               </button>
@@ -306,7 +330,7 @@ export default function RelatoriosPage() {
                 </button>
                 <button
                   onClick={handleExportPDF}
-                  className="flex-1 py-2 bg-primary-600 hover:bg-primary-700 dark:bg-primary-500 dark:hover:bg-primary-600 text-white font-semibold rounded-lg transition-colors text-sm"
+                  className="flex-1 py-2 bg-danger-600 hover:bg-danger-700 dark:bg-danger-500 dark:hover:bg-danger-600 text-white font-semibold rounded-lg transition-colors text-sm"
                 >
                   📄 PDF
                 </button>

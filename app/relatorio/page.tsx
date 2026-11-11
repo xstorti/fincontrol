@@ -90,98 +90,125 @@ export default function RelatorioPage() {
     if (!report) return;
 
     try {
-      const element = document.getElementById('report-content');
-      if (!element) return;
-
-      // Criar um clone e remover TODAS as classes para evitar colors LAB
-      const clone = element.cloneNode(true) as HTMLElement;
-      clone.className = ''; // Limpar todas as classes
-      
-      // Remover classes de todos os filhos
-      const allElements = clone.querySelectorAll('*');
-      allElements.forEach((el: any) => {
-        el.className = '';
-      });
-      
-      // Aplicar estilos básicos inline a tudo
-      clone.style.cssText = 'background-color: #ffffff; color: #000000; font-family: Arial, sans-serif; padding: 20px;';
-      
-      // Aplicar estilos aos filhos
-      allElements.forEach((el: any) => {
-        const tagName = el.tagName.toLowerCase();
-        if (tagName === 'h3') {
-          el.style.cssText = 'font-size: 18px; font-weight: bold; margin: 15px 0 10px 0; color: #000000;';
-        } else if (tagName === 'p') {
-          el.style.cssText = 'margin: 5px 0; color: #000000; font-size: 14px;';
-        } else if (tagName === 'div') {
-          el.style.cssText = 'margin: 10px 0; color: #000000;';
-        }
-        // Garantir que nenhum elemento tenha classes
-        el.className = '';
-      });
-      
-      // Adicionar temporariamente ao DOM para capturar
-      const tempContainer = document.createElement('div');
-      tempContainer.style.cssText = 'position: fixed; left: -10000px; top: 0; width: 800px; background: white;';
-      tempContainer.appendChild(clone);
-      document.body.appendChild(tempContainer);
-
-      // Aguardar um tick para garantir que estilos foram aplicados
-      await new Promise(resolve => setTimeout(resolve, 100));
-
-      // Capturar o conteúdo em canvas
-      const canvas = await html2canvas(clone, {
-        scale: 2,
-        useCORS: true,
-        allowTaint: true,
-        backgroundColor: '#ffffff',
-        logging: false,
-        ignoreElements: (element) => element.tagName === 'BUTTON', // Ignorar botões
-      });
-      
-      // Remover elemento temporário
-      document.body.removeChild(tempContainer);
-
-      // Criar PDF
       const pdf = new jsPDF({
         orientation: 'portrait',
         unit: 'mm',
         format: 'a4',
       });
 
-      const imgData = canvas.toDataURL('image/png');
       const pdfWidth = pdf.internal.pageSize.getWidth();
       const pdfHeight = pdf.internal.pageSize.getHeight();
-      const imgWidth = pdfWidth - 20;
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      let position = 15;
 
-      let position = 10;
-
-      // Adicionar título
-      pdf.setFontSize(16);
+      // Título
+      pdf.setFontSize(18);
       pdf.setFont('Helvetica', 'bold');
       pdf.text('Relatório FinControl', pdfWidth / 2, position, { align: 'center' });
 
-      position += 10;
+      position += 8;
       pdf.setFontSize(10);
       pdf.setFont('Helvetica', 'normal');
       pdf.text(`Data: ${new Date().toLocaleDateString('pt-BR')}`, pdfWidth / 2, position, { align: 'center' });
 
-      position += 15;
+      position += 12;
 
-      // Adicionar conteúdo capturado
-      pdf.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
+      // Seção Resumo
+      pdf.setFontSize(12);
+      pdf.setFont('Helvetica', 'bold');
+      pdf.text('Resumo', 15, position);
 
-      // Se a imagem for muito alta, adicionar em múltiplas páginas
-      let totalHeight = position + imgHeight;
-      while (totalHeight > pdfHeight) {
-        pdf.addPage();
-        position = 10;
-        totalHeight -= pdfHeight - 20;
-        pdf.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
+      position += 8;
+      pdf.setFontSize(10);
+      pdf.setFont('Helvetica', 'normal');
+      pdf.text(`Gasto Total: R$ ${report.gasto_total.toFixed(2)}`, 15, position);
+      position += 6;
+      pdf.text(`Saldo Atual: R$ ${report.saldo_atual.toFixed(2)}`, 15, position);
+
+      position += 10;
+
+      // Seção Transações
+      if (report.transacoes.length > 0) {
+        pdf.setFontSize(12);
+        pdf.setFont('Helvetica', 'bold');
+        pdf.text('Transações', 15, position);
+
+        position += 8;
+
+        // Cabeçalho da tabela
+        pdf.setFontSize(10);
+        pdf.setFont('Helvetica', 'bold');
+        pdf.text('Data', 15, position);
+        pdf.text('Descrição', 40, position);
+        pdf.text('Valor', 180, position, { align: 'right' });
+
+        position += 6;
+        pdf.line(15, position - 2, 200, position - 2); // Linha horizontal
+
+        position += 2;
+        pdf.setFont('Helvetica', 'normal');
+        pdf.setFontSize(9);
+
+        // Agrupar transações por dia
+        const transacoesPorDia: { [key: string]: typeof report.transacoes } = {};
+        report.transacoes.forEach(t => {
+          const data = new Date(t.data).toLocaleDateString('pt-BR');
+          if (!transacoesPorDia[data]) transacoesPorDia[data] = [];
+          transacoesPorDia[data].push(t);
+        });
+
+        let totalPorDia = 0;
+        Object.keys(transacoesPorDia).sort().forEach((data, idx) => {
+          const transacoes = transacoesPorDia[data];
+          const totalDia = transacoes.reduce((sum, t) => sum + t.valor, 0);
+          totalPorDia += totalDia;
+
+          // Transações do dia
+          transacoes.forEach((t, i) => {
+            if (position > pdfHeight - 15) {
+              pdf.addPage();
+              position = 15;
+            }
+
+            const dataAtual = i === 0 ? data : '';
+            pdf.text(dataAtual, 15, position);
+            
+            // Quebra de linha para descrições longas
+            const descricao = t.descricao.substring(0, 40);
+            pdf.text(descricao, 40, position);
+            pdf.text(`R$ ${t.valor.toFixed(2)}`, 180, position, { align: 'right' });
+
+            position += 5;
+          });
+
+          // Subtotal do dia
+          if (position > pdfHeight - 15) {
+            pdf.addPage();
+            position = 15;
+          }
+
+          pdf.setFont('Helvetica', 'bold');
+          pdf.text(`Total do dia (${data}):`, 40, position);
+          pdf.text(`R$ ${totalDia.toFixed(2)}`, 180, position, { align: 'right' });
+          pdf.setFont('Helvetica', 'normal');
+
+          position += 7;
+          pdf.line(15, position - 2, 200, position - 2);
+          position += 1;
+        });
+
+        // Total geral
+        position += 3;
+        if (position > pdfHeight - 15) {
+          pdf.addPage();
+          position = 15;
+        }
+
+        pdf.setFont('Helvetica', 'bold');
+        pdf.setFontSize(11);
+        pdf.text('Total Geral:', 40, position);
+        pdf.text(`R$ ${report.gasto_total.toFixed(2)}`, 180, position, { align: 'right' });
       }
 
-      // Salvar PDF
       pdf.save(`relatorio_gastos_${new Date().getTime()}.pdf`);
     } catch (err) {
       console.error('Erro ao gerar PDF:', err);
@@ -305,13 +332,13 @@ export default function RelatorioPage() {
             <div className="flex gap-2">
               <button
                 onClick={handleExportCSV}
-                className="flex-1 py-2 bg-success-600 hover:bg-success-700 dark:bg-success-500 dark:hover:bg-success-600 text-white font-semibold rounded-lg transition-colors text-sm"
+                className="!bg-success-600 hover:!bg-success-700 dark:!bg-success-500 dark:hover:!bg-success-600 flex-1 py-2 text-white font-semibold rounded-lg transition-colors text-sm"
               >
-                📥 CSV
+                📚 CSV
               </button>
               <button
                 onClick={handleExportPDF}
-                className="flex-1 py-2 bg-danger-600 hover:bg-danger-700 dark:bg-danger-500 dark:hover:bg-danger-600 text-white font-semibold rounded-lg transition-colors text-sm"
+                className="!bg-danger-600 hover:!bg-danger-700 dark:!bg-danger-500 dark:hover:!bg-danger-600 flex-1 py-2 text-white font-semibold rounded-lg transition-colors text-sm"
               >
                 📄 PDF
               </button>

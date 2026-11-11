@@ -257,7 +257,7 @@ export default function DashboardPage() {
         )}
 
         {/* Add Expense Button - CTA Hero */}
-        <div className="relative group mb-2">
+        <div className="relative group mb-8">
           {/* Glow Background */}
           <div className="absolute inset-0 bg-gradient-to-r from-primary-600 to-primary-500 rounded-2xl opacity-0 group-hover:opacity-50 blur-xl transition-opacity duration-300"></div>
           

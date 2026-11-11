@@ -116,11 +116,13 @@ export default function RelatoriosPage() {
       const element = document.getElementById('report-content');
       if (!element) return;
 
-      // Capturar o conteúdo em canvas
+      // Capturar o conteúdo em canvas com opções para suportar cores modernas
       const canvas = await html2canvas(element, {
         scale: 2,
         useCORS: true,
+        allowTaint: true,
         backgroundColor: '#ffffff',
+        logging: false,
       });
 
       // Criar PDF

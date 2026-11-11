@@ -113,23 +113,6 @@ export default function LoginPage() {
               {loading ? 'Conectando...' : 'Entrar'}
             </LoadingButton>
           </form>
-
-          {/* Test Credentials */}
-          <div className="mt-8 pt-6 border-t border-neutral-200 dark:border-neutral-700">
-            <p className="text-xs font-semibold text-neutral-600 dark:text-neutral-400 mb-3">👤 Credenciais de Teste:</p>
-            <div className="space-y-2 text-xs">
-              <div className="bg-neutral-100 dark:bg-neutral-900 px-3 py-2 rounded">
-                <p className="text-neutral-600 dark:text-neutral-400">
-                  <span className="text-neutral-700 dark:text-neutral-300 font-semibold">Admin:</span> pai@familia.com / admin123
-                </p>
-              </div>
-              <div className="bg-neutral-100 dark:bg-neutral-900 px-3 py-2 rounded">
-                <p className="text-neutral-600 dark:text-neutral-400">
-                  <span className="text-neutral-700 dark:text-neutral-300 font-semibold">Usuário:</span> filha@familia.com / user123
-                </p>
-              </div>
-            </div>
-          </div>
         </div>
 
         {/* Footer */}

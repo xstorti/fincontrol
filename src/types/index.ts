@@ -7,6 +7,7 @@ export interface User {
   tipo_usuario: 'admin' | 'user';
   criado_em: string;
   ativo: boolean;
+  senha_temporaria?: boolean;
 }
 
 // Credit/Saldo type

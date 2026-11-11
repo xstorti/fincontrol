@@ -30,6 +30,7 @@ export async function GET(req: NextRequest) {
           nome: users.nome,
           email: users.email,
           tipo_usuario: users.tipo_usuario,
+          senha_temporaria: users.senha_temporaria,
         },
       } as ApiResponse<any>,
       { status: 200 }

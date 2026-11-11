@@ -102,6 +102,7 @@ export async function POST(req: NextRequest) {
           senha_hash: senhaHash,
           tipo_usuario,
           ativo: true,
+          senha_temporaria: true,
           criado_em: new Date().toISOString(),
         },
       ])

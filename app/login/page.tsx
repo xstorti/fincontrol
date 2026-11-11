@@ -31,7 +31,12 @@ export default function LoginPage() {
         return;
       }
 
-      router.push('/dashboard');
+      // Check if password is temporary
+      if (data.data?.senha_temporaria) {
+        router.push('/mudar-senha');
+      } else {
+        router.push('/dashboard');
+      }
     } catch (err: any) {
       setError(err.message || 'Erro ao fazer login');
     } finally {

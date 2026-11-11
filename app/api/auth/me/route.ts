@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withAuth, createErrorResponse } from '@/lib/middleware';
-import { readCsv } from '@/lib/csv';
+import { supabaseAdmin } from '@/lib/supabase';
 import { User, ApiResponse } from '@/types';
 
 export async function GET(req: NextRequest) {
@@ -11,11 +11,14 @@ export async function GET(req: NextRequest) {
       return createErrorResponse('Não autenticado', 401);
     }
 
-    // Get user details from CSV
-    const users = readCsv<User>('users.csv');
-    const userDetails = users.find((u) => u.id === user.id);
+    // Get user details from Supabase
+    const { data: users, error: dbError } = await supabaseAdmin
+      .from('users')
+      .select('*')
+      .eq('id', user.id)
+      .single();
 
-    if (!userDetails) {
+    if (dbError || !users) {
       return createErrorResponse('Usuário não encontrado', 404);
     }
 
@@ -23,10 +26,10 @@ export async function GET(req: NextRequest) {
       {
         success: true,
         data: {
-          id: userDetails.id,
-          nome: userDetails.nome,
-          email: userDetails.email,
-          tipo_usuario: userDetails.tipo_usuario,
+          id: users.id,
+          nome: users.nome,
+          email: users.email,
+          tipo_usuario: users.tipo_usuario,
         },
       } as ApiResponse<any>,
       { status: 200 }

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withAuth, createErrorResponse } from '@/lib/middleware';
-import { calculateKPI, calculateBalance } from '@/lib/kpi';
+import { supabaseAdmin } from '@/lib/supabase';
 import { ApiResponse, KPI } from '@/types';
 
 export async function GET(req: NextRequest) {
@@ -21,8 +21,46 @@ export async function GET(req: NextRequest) {
       return createErrorResponse('Acesso negado', 403);
     }
 
-    // Calculate KPI
-    const kpi = calculateKPI(usuario_id, dias);
+    // Calculate date range
+    const dataFim = new Date();
+    const dataInicio = new Date();
+    dataInicio.setDate(dataInicio.getDate() - dias);
+    const dataInicioStr = dataInicio.toISOString().split('T')[0];
+
+    // Get all credits for user
+    const { data: credits } = await supabaseAdmin
+      .from('credits')
+      .select('valor')
+      .eq('usuario_id', parseInt(usuario_id));
+
+    // Get all transactions (despesas) for user
+    const { data: transactions } = await supabaseAdmin
+      .from('transactions')
+      .select('valor, data')
+      .eq('usuario_id', parseInt(usuario_id))
+      .eq('tipo', 'despesa');
+
+    // Get transactions in period
+    const { data: transacoesPeriodo } = await supabaseAdmin
+      .from('transactions')
+      .select('valor')
+      .eq('usuario_id', parseInt(usuario_id))
+      .eq('tipo', 'despesa')
+      .gte('data', dataInicioStr);
+
+    // Calculate totals
+    const totalCredito = (credits || []).reduce((sum, c) => sum + (c.valor || 0), 0);
+    const totalGasto = (transactions || []).reduce((sum, t) => sum + (t.valor || 0), 0);
+    const gastoPeriorod = (transacoesPeriodo || []).reduce((sum, t) => sum + (t.valor || 0), 0);
+    
+    const saldo_atual = totalCredito - totalGasto;
+    const media_dia = dias > 0 ? gastoPeriorod / dias : 0;
+
+    const kpi: KPI = {
+      saldo_atual,
+      gasto_periodo: gastoPeriorod,
+      media_dia: Math.round(media_dia * 100) / 100, // Round to 2 decimals
+    };
 
     return NextResponse.json(
       {

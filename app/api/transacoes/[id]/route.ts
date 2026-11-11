@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withAuth, createErrorResponse } from '@/lib/middleware';
-import { readCsv, deleteCsvRow } from '@/lib/csv';
-import { Transaction, ApiResponse } from '@/types';
+import { supabaseAdmin } from '@/lib/supabase';
+import { ApiResponse } from '@/types';
 
 export async function DELETE(
   req: NextRequest,
@@ -16,23 +16,29 @@ export async function DELETE(
 
     const { id } = await params;
 
-    // Verify transaction exists and belongs to user
-    const transactions = readCsv<Transaction>('transactions.csv');
-    const transaction = transactions.find((t) => t.id === id);
+    // Get transaction from Supabase
+    const { data: transaction, error: fetchError } = await supabaseAdmin
+      .from('transactions')
+      .select('*')
+      .eq('id', parseInt(id))
+      .single();
 
-    if (!transaction) {
+    if (fetchError || !transaction) {
       return createErrorResponse('Transação não encontrada', 404);
     }
 
     // Check permissions
-    if (transaction.usuario_id !== user.id && user.tipo_usuario !== 'admin') {
+    if (transaction.usuario_id !== parseInt(user.id) && user.tipo_usuario !== 'admin') {
       return createErrorResponse('Acesso negado', 403);
     }
 
     // Delete transaction
-    const deleted = deleteCsvRow<Transaction>('transactions.csv', id);
+    const { error: deleteError } = await supabaseAdmin
+      .from('transactions')
+      .delete()
+      .eq('id', parseInt(id));
 
-    if (!deleted) {
+    if (deleteError) {
       return createErrorResponse('Erro ao deletar transação', 400);
     }
 

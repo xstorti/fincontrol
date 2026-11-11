@@ -244,7 +244,7 @@ export default function RelatorioPage() {
           href="/dashboard"
           className="block w-full py-2 bg-gray-600 hover:bg-gray-700 text-white font-semibold rounded-lg text-center transition-colors"
         >
-          ← Voltar ao Dashboard
+          Voltar ao Dashboard
         </Link>
       </main>
     </div>

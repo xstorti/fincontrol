@@ -394,7 +394,7 @@ export default function CreditosPage() {
           href="/admin"
           className="block w-full py-2 bg-neutral-600 dark:bg-neutral-700 hover:bg-neutral-700 dark:hover:bg-neutral-600 text-white font-semibold rounded-lg text-center transition-colors"
         >
-          ← Voltar
+          Voltar
         </Link>
       </main>
     </div>

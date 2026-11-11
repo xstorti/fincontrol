@@ -254,15 +254,7 @@ export default function UsuariosPage() {
           href="/admin"
           className="block w-full py-2 bg-neutral-600 dark:bg-neutral-700 hover:bg-neutral-700 dark:hover:bg-neutral-600 text-white font-semibold rounded-lg text-center transition-colors"
         >
-          ← Voltar
-        </Link>
-      </main>
-    </div>
-  );
-}
-          className="block w-full py-2 bg-gray-600 hover:bg-gray-700 text-white font-semibold rounded-lg text-center transition-colors"
-        >
-          ← Voltar
+          &larr; Voltar
         </Link>
       </main>
     </div>

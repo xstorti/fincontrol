@@ -3,9 +3,9 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { LoadingSpinner, ErrorAlert, SkeletonList, ThemeToggle } from '@/components';
+import { LoadingSpinner, ErrorAlert, SkeletonList } from '@/components';
 import { KPI, Transaction, User } from '@/types';
-import { Plus, TrendingDown, TrendingUp, BarChart3, Settings, LogOut } from 'lucide-react';
+import { Plus, TrendingDown, TrendingUp, BarChart3, Settings, LogOut, ArrowRight } from 'lucide-react';
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -19,7 +19,6 @@ export default function DashboardPage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Get user
         const userRes = await fetch('/api/auth/me');
         if (!userRes.ok) {
           router.push('/login');
@@ -29,14 +28,12 @@ export default function DashboardPage() {
         const userData = await userRes.json();
         setUser(userData.data);
 
-        // Get KPI
         const kpiRes = await fetch(`/api/saldo?dias=${dias}`);
         if (kpiRes.ok) {
           const kpiData = await kpiRes.json();
           setKpi(kpiData.data);
         }
 
-        // Get transactions
         const txRes = await fetch(`/api/transacoes?dias=${dias}&limit=10`);
         if (txRes.ok) {
           const txData = await txRes.json();
@@ -62,39 +59,43 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="flex flex-col min-h-screen bg-neutral-50 dark:bg-neutral-900">
+    <div className="flex flex-col min-h-screen bg-gradient-to-b from-neutral-900 via-neutral-900 to-neutral-800">
+      {/* Background gradient elements */}
+      <div className="fixed top-0 left-1/4 w-96 h-96 bg-primary-500/5 rounded-full blur-3xl -z-10"></div>
+      <div className="fixed bottom-0 right-1/4 w-96 h-96 bg-secondary-500/5 rounded-full blur-3xl -z-10"></div>
+
       {/* Header */}
-      <header className="bg-white dark:bg-neutral-800 border-b border-neutral-200 dark:border-neutral-700 sticky top-0 z-20 shadow-sm">
-        <div className="max-w-2xl mx-auto px-4 py-4 flex items-center justify-between">
+      <header className="bg-neutral-800/50 dark:bg-neutral-800/50 backdrop-blur-xl border-b border-neutral-700/50 sticky top-0 z-20 shadow-lg">
+        <div className="max-w-4xl mx-auto px-4 py-4 sm:px-6 lg:px-8 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-primary-100 dark:bg-primary-900/30 rounded-lg flex items-center justify-center text-lg">
+            <div className="w-11 h-11 bg-gradient-to-br from-primary-500 to-secondary-500 rounded-xl flex items-center justify-center text-lg shadow-lg shadow-primary-500/30">
               💰
             </div>
-            <h1 className="text-xl font-bold text-neutral-900 dark:text-neutral-100">FinControl</h1>
+            <div>
+              <h1 className="text-lg font-black text-white">FinControl</h1>
+              <p className="text-xs text-neutral-400">Controle Financeiro</p>
+            </div>
           </div>
           
-          <div className="flex items-center gap-3">
-            <ThemeToggle />
-            <button
-              onClick={handleLogout}
-              className="p-2.5 rounded-lg bg-neutral-100 dark:bg-neutral-700 text-neutral-600 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-600 transition-colors"
-              aria-label="Sair"
-            >
-              <LogOut size={20} />
-            </button>
-          </div>
+          <button
+            onClick={handleLogout}
+            className="p-2.5 rounded-lg bg-neutral-700/50 hover:bg-neutral-600/50 text-neutral-300 hover:text-white transition-all duration-300"
+            aria-label="Sair"
+          >
+            <LogOut size={20} />
+          </button>
         </div>
       </header>
 
       {/* Main Content */}
-      <main className="flex-1 max-w-2xl mx-auto w-full px-4 py-8 space-y-8">
+      <main className="flex-1 max-w-4xl mx-auto w-full px-4 py-8 sm:px-6 lg:px-8 space-y-8">
         {/* Error Alert */}
         {error && <ErrorAlert message="Erro ao carregar dados" details={error} />}
 
         {/* Welcome Section */}
-        <div className="space-y-2">
-          <p className="text-neutral-600 dark:text-neutral-400">Bem-vindo</p>
-          <h2 className="text-3xl font-bold text-neutral-900 dark:text-neutral-100">
+        <div className="space-y-2 animate-blur-in">
+          <p className="text-neutral-400 font-medium text-sm">Bem-vindo de volta</p>
+          <h2 className="text-4xl font-black text-white">
             Olá, {user?.nome}! 👋
           </h2>
         </div>
@@ -102,26 +103,44 @@ export default function DashboardPage() {
         {/* KPI Cards Section */}
         {kpi && (
           <div className="space-y-6">
-            {/* Main Balance Card */}
-            <div className="bg-linear-to-br from-primary-500 to-primary-700 dark:from-primary-600 dark:to-primary-800 rounded-2xl shadow-lg p-8 text-white">
-              <p className="text-primary-100 text-sm font-medium mb-2">Saldo Atual</p>
-              <p className="text-5xl font-bold mb-4">
-                R$ {Math.abs(kpi.saldo_atual).toFixed(2)}
-              </p>
-              <p className="text-primary-100 text-sm">
-                {kpi.saldo_atual >= 0 ? '✓ Saldo positivo' : '⚠ Saldo em débito'}
-              </p>
+            {/* Main Balance Card - Premium */}
+            <div className="group relative">
+              <div className="absolute inset-0 bg-gradient-to-r from-primary-500/20 to-secondary-500/20 rounded-3xl blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+              <div className="relative bg-gradient-to-br from-primary-600 to-primary-800 dark:from-primary-700 dark:to-primary-900 rounded-3xl shadow-2xl p-8 text-white border border-primary-500/20">
+                <div className="flex items-start justify-between mb-6">
+                  <div>
+                    <p className="text-primary-100 text-sm font-bold uppercase tracking-wide mb-2">Saldo Atual</p>
+                    <p className="text-5xl font-black">
+                      R$ {Math.abs(kpi.saldo_atual).toFixed(2)}
+                    </p>
+                  </div>
+                  <div className="text-3xl">💳</div>
+                </div>
+                <div className="flex items-center gap-2 text-primary-100 text-sm font-medium">
+                  {kpi.saldo_atual >= 0 ? (
+                    <>
+                      <TrendingUp size={16} />
+                      Saldo positivo
+                    </>
+                  ) : (
+                    <>
+                      <TrendingDown size={16} />
+                      Saldo em débito
+                    </>
+                  )}
+                </div>
+              </div>
             </div>
 
             {/* Period Selector */}
-            <div>
-              <label className="block text-sm font-semibold text-neutral-700 dark:text-neutral-300 mb-3">
+            <div className="bg-neutral-800/50 backdrop-blur-sm rounded-2xl border border-neutral-700/50 p-4">
+              <label className="block text-xs font-bold uppercase tracking-wide text-neutral-400 mb-3">
                 Período de Análise
               </label>
               <select
                 value={dias}
                 onChange={(e) => setDias(parseInt(e.target.value))}
-                className="w-full px-4 py-3 bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 text-neutral-900 dark:text-neutral-100 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                className="w-full px-4 py-3 bg-neutral-700/50 border border-neutral-600/50 hover:border-neutral-500/50 focus:border-primary-500/50 text-neutral-100 placeholder-neutral-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500/20 transition-all duration-300"
               >
                 <option value={7}>Últimos 7 dias</option>
                 <option value={14}>Últimos 14 dias</option>
@@ -131,35 +150,35 @@ export default function DashboardPage() {
             </div>
 
             {/* Stats Grid */}
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {/* Expenses */}
-              <div className="bg-white dark:bg-neutral-800 rounded-xl shadow-sm border border-neutral-200 dark:border-neutral-700 p-6">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-12 h-12 bg-danger-100 dark:bg-danger-900/30 rounded-lg flex items-center justify-center">
-                    <TrendingDown className="w-6 h-6 text-danger-600 dark:text-danger-500" />
+              <div className="group bg-neutral-800/50 dark:bg-neutral-800/50 backdrop-blur-sm rounded-2xl border border-neutral-700/50 hover:border-danger-500/50 p-6 transition-all duration-300 hover-lift">
+                <div className="flex items-center gap-4 mb-4">
+                  <div className="p-3 bg-danger-500/10 rounded-lg group-hover:bg-danger-500/20 transition-colors">
+                    <TrendingDown className="w-6 h-6 text-danger-400" />
                   </div>
                   <div>
-                    <p className="text-xs font-medium text-neutral-600 dark:text-neutral-400">Despesa Total</p>
-                    <p className="text-xs text-neutral-500 dark:text-neutral-500">{dias} dias</p>
+                    <p className="text-xs font-bold uppercase tracking-wide text-neutral-400">Despesa Total</p>
+                    <p className="text-xs text-neutral-500">{dias} dias</p>
                   </div>
                 </div>
-                <p className="text-2xl font-bold text-danger-600 dark:text-danger-500">
+                <p className="text-3xl font-black text-danger-400">
                   R$ {kpi.gasto_periodo.toFixed(2)}
                 </p>
               </div>
 
               {/* Average per day */}
-              <div className="bg-white dark:bg-neutral-800 rounded-xl shadow-sm border border-neutral-200 dark:border-neutral-700 p-6">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-12 h-12 bg-warning-100 dark:bg-warning-900/30 rounded-lg flex items-center justify-center">
-                    <BarChart3 className="w-6 h-6 text-warning-600 dark:text-warning-500" />
+              <div className="group bg-neutral-800/50 dark:bg-neutral-800/50 backdrop-blur-sm rounded-2xl border border-neutral-700/50 hover:border-warning-500/50 p-6 transition-all duration-300 hover-lift">
+                <div className="flex items-center gap-4 mb-4">
+                  <div className="p-3 bg-warning-500/10 rounded-lg group-hover:bg-warning-500/20 transition-colors">
+                    <BarChart3 className="w-6 h-6 text-warning-400" />
                   </div>
                   <div>
-                    <p className="text-xs font-medium text-neutral-600 dark:text-neutral-400">Média Diária</p>
-                    <p className="text-xs text-neutral-500 dark:text-neutral-500">por dia</p>
+                    <p className="text-xs font-bold uppercase tracking-wide text-neutral-400">Média Diária</p>
+                    <p className="text-xs text-neutral-500">por dia</p>
                   </div>
                 </div>
-                <p className="text-2xl font-bold text-warning-600 dark:text-warning-500">
+                <p className="text-3xl font-black text-warning-400">
                   R$ {kpi.media_dia.toFixed(2)}
                 </p>
               </div>
@@ -170,38 +189,46 @@ export default function DashboardPage() {
         {/* Add Expense Button */}
         <Link
           href="/adicionar-gasto"
-          className="flex w-full py-4 bg-primary-600 hover:bg-primary-700 dark:bg-primary-500 dark:hover:bg-primary-600 text-white font-semibold rounded-xl transition-colors shadow-lg hover:shadow-xl items-center justify-center gap-2"
+          className="group flex w-full py-4 px-6 bg-gradient-to-r from-primary-600 to-secondary-600 hover:from-primary-500 hover:to-secondary-500 text-white font-bold rounded-xl transition-all duration-300 shadow-lg shadow-primary-500/30 hover:shadow-xl hover:shadow-primary-500/40 items-center justify-center gap-3 hover-lift"
         >
-          <Plus size={20} />
-          Adicionar Despesa
+          <Plus size={20} className="transition-transform group-hover:scale-110" />
+          <span>Adicionar Despesa</span>
+          <ArrowRight size={18} className="opacity-0 -ml-2 transition-all group-hover:opacity-100 group-hover:ml-0" />
         </Link>
 
         {/* Transactions Section */}
-        <div>
-          <h3 className="text-lg font-semibold text-neutral-900 dark:text-neutral-100 mb-4">
+        <div className="space-y-4">
+          <h3 className="text-lg font-black text-white">
             Últimas Transações
           </h3>
 
           {transactions.length === 0 ? (
-            <div className="bg-white dark:bg-neutral-800 rounded-xl shadow-sm border border-neutral-200 dark:border-neutral-700 p-8 text-center">
-              <p className="text-neutral-600 dark:text-neutral-400 text-sm">Nenhuma transação no período</p>
+            <div className="bg-neutral-800/50 backdrop-blur-sm rounded-2xl border border-neutral-700/50 p-12 text-center">
+              <p className="text-neutral-400 font-medium">Nenhuma transação no período</p>
+              <p className="text-neutral-500 text-sm mt-2">Adicione uma despesa para começar</p>
             </div>
           ) : (
             <div className="space-y-3">
               {transactions.map((tx) => (
                 <div
                   key={tx.id}
-                  className="bg-white dark:bg-neutral-800 rounded-lg shadow-sm border border-neutral-200 dark:border-neutral-700 p-4 flex items-center justify-between hover:shadow-md dark:hover:shadow-dark-md transition-all"
+                  className="group bg-neutral-800/50 dark:bg-neutral-800/50 backdrop-blur-sm rounded-xl border border-neutral-700/50 hover:border-primary-500/50 p-4 flex items-center justify-between transition-all duration-300 hover:shadow-lg hover:shadow-primary-500/10 hover-lift"
                 >
                   <div className="flex-1 min-w-0">
-                    <p className="font-medium text-neutral-900 dark:text-neutral-100 truncate">{tx.descricao}</p>
-                    <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-1">
-                      {new Date(tx.data).toLocaleDateString('pt-BR')}
+                    <p className="font-semibold text-neutral-100 truncate group-hover:text-white transition-colors">{tx.descricao}</p>
+                    <p className="text-xs text-neutral-500 mt-1.5">
+                      {new Date(tx.data).toLocaleDateString('pt-BR', { 
+                        month: 'short', 
+                        day: 'numeric',
+                        year: '2-digit'
+                      })}
                     </p>
                   </div>
-                  <p className="text-lg font-semibold text-danger-600 dark:text-danger-500 ml-4 shrink-0">
-                    -R$ {tx.valor.toFixed(2)}
-                  </p>
+                  <div className="text-right ml-4 shrink-0">
+                    <p className="text-lg font-black text-danger-400">
+                      -R$ {tx.valor.toFixed(2)}
+                    </p>
+                  </div>
                 </div>
               ))}
             </div>
@@ -209,10 +236,10 @@ export default function DashboardPage() {
         </div>
 
         {/* Navigation Footer */}
-        <div className="grid grid-cols-2 gap-4 pt-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 pb-8">
           <Link
             href="/relatorio"
-            className="flex items-center justify-center gap-2 py-4 bg-white dark:bg-neutral-800 hover:bg-neutral-50 dark:hover:bg-neutral-700 border border-neutral-200 dark:border-neutral-700 text-primary-600 dark:text-primary-500 font-semibold rounded-lg transition-colors"
+            className="group flex items-center justify-center gap-2 py-4 px-6 bg-neutral-800/50 hover:bg-neutral-700/50 border border-neutral-700/50 hover:border-primary-500/50 text-primary-400 hover:text-primary-300 font-bold rounded-xl transition-all duration-300 hover-lift"
           >
             <BarChart3 size={20} />
             <span>Relatório</span>
@@ -220,7 +247,7 @@ export default function DashboardPage() {
           {user?.tipo_usuario === 'admin' && (
             <Link
               href="/admin"
-              className="flex items-center justify-center gap-2 py-4 bg-white dark:bg-neutral-800 hover:bg-neutral-50 dark:hover:bg-neutral-700 border border-neutral-200 dark:border-neutral-700 text-secondary-600 dark:text-secondary-500 font-semibold rounded-lg transition-colors"
+              className="group flex items-center justify-center gap-2 py-4 px-6 bg-neutral-800/50 hover:bg-neutral-700/50 border border-neutral-700/50 hover:border-secondary-500/50 text-secondary-400 hover:text-secondary-300 font-bold rounded-xl transition-all duration-300 hover-lift"
             >
               <Settings size={20} />
               <span>Painel Admin</span>

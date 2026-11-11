@@ -2,8 +2,8 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { LoadingButton, ErrorAlert, ThemeToggle } from '@/components';
-import { Lock, Mail } from 'lucide-react';
+import { LoadingButton, ErrorAlert } from '@/components';
+import { Lock, Mail, ArrowRight } from 'lucide-react';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -31,7 +31,6 @@ export default function LoginPage() {
         return;
       }
 
-      // Redirect to dashboard
       router.push('/dashboard');
     } catch (err: any) {
       setError(err.message || 'Erro ao fazer login');
@@ -41,83 +40,105 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-linear-to-br from-neutral-50 via-primary-50 to-neutral-50 dark:from-neutral-900 dark:via-primary-900/20 dark:to-neutral-900 px-4 py-8 relative">
-      {/* Theme Toggle */}
-      <div className="absolute top-4 right-4">
-        <ThemeToggle />
-      </div>
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-neutral-900 via-neutral-800 to-neutral-900 px-4 py-8 relative overflow-hidden">
+      {/* Animated background gradient elements */}
+      <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary-500/10 rounded-full blur-3xl"></div>
+      <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-secondary-500/10 rounded-full blur-3xl"></div>
 
-      {/* Main Card */}
-      <div className="w-full max-w-sm">
-        {/* Header/Logo */}
-        <div className="text-center mb-10">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-primary-100 dark:bg-primary-900/30 rounded-2xl mb-4">
-            <span className="text-3xl">💰</span>
+      {/* Main Container */}
+      <div className="w-full max-w-sm relative z-10">
+        {/* Header Section */}
+        <div className="text-center mb-12">
+          {/* Icon with glow effect */}
+          <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-primary-500 to-secondary-500 rounded-3xl mb-6 shadow-2xl shadow-primary-500/50">
+            <span className="text-4xl">💰</span>
           </div>
-          <h1 className="text-3xl font-bold text-neutral-900 dark:text-neutral-100 mb-2">FinControl</h1>
-          <p className="text-neutral-600 dark:text-neutral-400">Controle Financeiro Familiar</p>
+          
+          {/* Branding */}
+          <h1 className="text-4xl font-black text-white mb-2 tracking-tight">FinControl</h1>
+          <p className="text-base text-neutral-400 font-medium">Controle Financeiro Familiar</p>
         </div>
 
-        {/* Card */}
-        <div className="bg-white dark:bg-neutral-800 rounded-2xl shadow-xl dark:shadow-dark-xl p-8">
-          {/* Error Alert */}
-          {error && <ErrorAlert message="Falha na autenticação" details={error} />}
-
-          {/* Form */}
-          <form onSubmit={handleSubmit} className="space-y-5">
-            {/* Email Input */}
-            <div>
-              <label htmlFor="email" className="block text-sm font-semibold text-neutral-700 dark:text-neutral-300 mb-2.5">
-                Email
-              </label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-3.5 w-5 h-5 text-neutral-400 dark:text-neutral-500" />
-                <input
-                  id="email"
-                  type="email"
-                  placeholder="seu@email.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  className="w-full pl-10 pr-4 py-3 bg-neutral-50 dark:bg-neutral-700 border border-neutral-200 dark:border-neutral-600 rounded-lg text-neutral-900 dark:text-neutral-100 placeholder-neutral-400 dark:placeholder-neutral-500 focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
-                />
+        {/* Login Card with glassmorphism effect */}
+        <div className="relative group">
+          {/* Glow background */}
+          <div className="absolute inset-0 bg-gradient-to-r from-primary-500/20 to-secondary-500/20 rounded-3xl blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+          
+          {/* Card */}
+          <div className="relative bg-neutral-800/80 backdrop-blur-xl border border-neutral-700/50 rounded-3xl shadow-2xl p-8 space-y-6">
+            {/* Error Alert */}
+            {error && (
+              <div className="p-4 bg-danger-500/10 border border-danger-500/30 rounded-xl">
+                <p className="text-sm text-danger-400 font-medium">{error}</p>
               </div>
-            </div>
+            )}
 
-            {/* Password Input */}
-            <div>
-              <label htmlFor="senha" className="block text-sm font-semibold text-neutral-700 dark:text-neutral-300 mb-2.5">
-                Senha
-              </label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-3.5 w-5 h-5 text-neutral-400 dark:text-neutral-500" />
-                <input
-                  id="senha"
-                  type="password"
-                  placeholder="••••••••"
-                  value={senha}
-                  onChange={(e) => setSenha(e.target.value)}
-                  required
-                  className="w-full pl-10 pr-4 py-3 bg-neutral-50 dark:bg-neutral-700 border border-neutral-200 dark:border-neutral-600 rounded-lg text-neutral-900 dark:text-neutral-100 placeholder-neutral-400 dark:placeholder-neutral-500 focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
-                />
+            {/* Form */}
+            <form onSubmit={handleSubmit} className="space-y-5">
+              {/* Email Input */}
+              <div>
+                <label htmlFor="email" className="block text-sm font-semibold text-neutral-200 mb-3">
+                  Email
+                </label>
+                <div className="relative group">
+                  <Mail className="absolute left-4 top-4 w-5 h-5 text-neutral-500 transition-colors group-focus-within:text-primary-400" />
+                  <input
+                    id="email"
+                    type="email"
+                    placeholder="seu@email.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    className="w-full pl-12 pr-4 py-3.5 bg-neutral-700/50 border border-neutral-600/50 hover:border-neutral-500/50 focus:border-primary-500/50 rounded-xl text-neutral-100 placeholder-neutral-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20 transition-all duration-300"
+                  />
+                </div>
               </div>
-            </div>
 
-            {/* Submit Button */}
-            <LoadingButton
-              type="submit"
-              loading={loading}
-              disabled={loading}
-              className="w-full py-3 mt-6 bg-primary-600 hover:bg-primary-700 dark:bg-primary-500 dark:hover:bg-primary-600 disabled:bg-neutral-300 dark:disabled:bg-neutral-700 text-white font-semibold rounded-lg transition-colors"
-            >
-              {loading ? 'Conectando...' : 'Entrar'}
-            </LoadingButton>
-          </form>
+              {/* Password Input */}
+              <div>
+                <label htmlFor="senha" className="block text-sm font-semibold text-neutral-200 mb-3">
+                  Senha
+                </label>
+                <div className="relative group">
+                  <Lock className="absolute left-4 top-4 w-5 h-5 text-neutral-500 transition-colors group-focus-within:text-primary-400" />
+                  <input
+                    id="senha"
+                    type="password"
+                    placeholder="••••••••"
+                    value={senha}
+                    onChange={(e) => setSenha(e.target.value)}
+                    required
+                    className="w-full pl-12 pr-4 py-3.5 bg-neutral-700/50 border border-neutral-600/50 hover:border-neutral-500/50 focus:border-primary-500/50 rounded-xl text-neutral-100 placeholder-neutral-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20 transition-all duration-300"
+                  />
+                </div>
+              </div>
+
+              {/* Submit Button */}
+              <LoadingButton
+                type="submit"
+                loading={loading}
+                disabled={loading}
+                className="w-full py-3.5 mt-8 bg-gradient-to-r from-primary-600 to-secondary-600 hover:from-primary-500 hover:to-secondary-500 disabled:from-neutral-600 disabled:to-neutral-600 text-white font-bold rounded-xl transition-all duration-300 flex items-center justify-center gap-2 shadow-lg shadow-primary-500/30 hover:shadow-xl hover:shadow-primary-500/40"
+              >
+                {loading ? (
+                  <>
+                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                    Conectando...
+                  </>
+                ) : (
+                  <>
+                    Entrar
+                    <ArrowRight size={18} className="transition-transform group-hover:translate-x-1" />
+                  </>
+                )}
+              </LoadingButton>
+            </form>
+          </div>
         </div>
 
         {/* Footer */}
-        <p className="text-center text-xs text-neutral-600 dark:text-neutral-500 mt-6">
-          © 2024 FinControl. Todos os direitos reservados.
+        <p className="text-center text-xs text-neutral-500 mt-8 font-medium">
+          © 2024 FinControl • Controle Financeiro Familiar
         </p>
       </div>
     </div>

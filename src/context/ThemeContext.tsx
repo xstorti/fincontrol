@@ -6,36 +6,52 @@ type Theme = 'light' | 'dark';
 
 interface ThemeContextType {
   theme: Theme;
-  toggleTheme: () => void;
 }
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setTheme] = useState<Theme>('light');
+  const [theme, setTheme] = useState<Theme>('dark');
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    // Get saved theme or detect system preference
-    const savedTheme = localStorage.getItem('theme') as Theme | null;
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    const initialTheme = savedTheme || (prefersDark ? 'dark' : 'light');
+    const applyTheme = async () => {
+      try {
+        // Try to get current user type
+        const res = await fetch('/api/auth/me', { 
+          credentials: 'include',
+          cache: 'no-store'
+        });
+        
+        if (res.ok) {
+          const data = await res.json();
+          const userType = data.data?.tipo_usuario;
+          
+          // Admin = light mode, User = dark mode
+          const newTheme = userType === 'admin' ? 'light' : 'dark';
+          setTheme(newTheme);
+          document.documentElement.classList.toggle('dark', newTheme === 'dark');
+        } else {
+          // Not authenticated - use dark mode by default
+          document.documentElement.classList.add('dark');
+        }
+      } catch (err) {
+        // On error, default to dark mode
+        document.documentElement.classList.add('dark');
+      } finally {
+        setMounted(true);
+      }
+    };
 
-    setTheme(initialTheme);
-    document.documentElement.classList.toggle('dark', initialTheme === 'dark');
-    setMounted(true);
+    applyTheme();
   }, []);
 
-  const toggleTheme = () => {
-    const newTheme = theme === 'light' ? 'dark' : 'light';
-    setTheme(newTheme);
-    localStorage.setItem('theme', newTheme);
-    document.documentElement.classList.toggle('dark', newTheme === 'dark');
-  };
+  if (!mounted) {
+    return <>{children}</>;
+  }
 
-  // Always provide context, even during SSR
   return (
-    <ThemeContext.Provider value={{ theme, toggleTheme }}>
+    <ThemeContext.Provider value={{ theme }}>
       {children}
     </ThemeContext.Provider>
   );
@@ -44,10 +60,8 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 export function useTheme() {
   const context = useContext(ThemeContext);
   if (context === undefined) {
-    // Return safe default for SSG/SSR scenarios
     return {
-      theme: 'light' as const,
-      toggleTheme: () => {},
+      theme: 'dark' as const,
     };
   }
   return context;

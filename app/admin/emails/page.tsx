@@ -267,7 +267,7 @@ export default function EmailsPage() {
           href="/admin"
           className="block w-full py-2 bg-gray-600 hover:bg-gray-700 text-white font-semibold rounded-lg text-center transition-colors"
         >
-          ← Voltar
+          Voltar
         </Link>
       </main>
     </div>

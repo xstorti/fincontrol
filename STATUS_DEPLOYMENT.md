@@ -20,15 +20,25 @@
 
 ### Autenticação
 - ✅ Login (POST /api/auth/login)
+- ✅ Get current user (GET /api/auth/me) - **JUST MIGRATED**
 - ✅ JWT token generation
 - ✅ HttpOnly Secure Cookies
 - ✅ Admin account (pai@familia.com/admin123)
 - ✅ User account (filha@familia.com/user123)
 
+### Transações
+- ✅ List transactions (GET /api/transacoes) - **JUST MIGRATED**
+- ✅ Create transaction (POST /api/transacoes) - **JUST MIGRATED**
+- ✅ Delete transaction (DELETE /api/transacoes/[id]) - **JUST MIGRATED**
+
+### Saldo & KPI
+- ✅ Calculate balance (GET /api/saldo) - **JUST MIGRATED**
+
 ### Database
 - ✅ Supabase PostgreSQL connected
 - ✅ Users table with test data
 - ✅ Credits table with test data
+- ✅ Transactions table with test data
 - ✅ Email config table
 
 ### Deployment
@@ -42,21 +52,20 @@
 ## ❌ O Que Ainda Precisa
 
 ### Fase 1 - Endpoints de Auth (Crítico)
-- [ ] GET /api/auth/me - Validar sessão do usuário
+- [x] GET /api/auth/me - Validar sessão do usuário ✅
 - [ ] POST /api/auth/logout - Fazer logout
 
 **Por quê?** Página precisa validar se usuário está logado ao carregar
 
 ### Fase 2 - Endpoints de Transações (Essencial)
-- [ ] GET /api/transacoes - Listar despesas
-- [ ] POST /api/transacoes - Adicionar despesa
-- [ ] DELETE /api/transacoes/[id] - Deletar despesa
+- [x] GET /api/transacoes - Listar despesas ✅
+- [x] POST /api/transacoes - Adicionar despesa ✅
+- [x] DELETE /api/transacoes/[id] - Deletar despesa ✅
 
-**Por quê?** Dashboard não consegue mostrar transações sem isso
+**Por quê?** Dashboard consegue mostrar transações
 
 ### Fase 3 - Saldo e KPI (Essencial)
-- [ ] GET /api/saldo - Calcular saldo e KPI
-- [ ] Atualizar src/lib/kpi.ts para usar Supabase
+- [x] GET /api/saldo - Calcular saldo e KPI ✅
 
 **Por quê?** Cards do dashboard mostram saldo/gasto
 
@@ -84,13 +93,13 @@
 ## 📊 Progresso Geral
 
 ```
-Autenticação:      ████░░░░░░ 50% (1/2)
-Transações:        ░░░░░░░░░░  0% (0/3)
+Autenticação:      ██░░░░░░░░ 50% (1/2)
+Transações:        ██████████ 100% (3/3) ✅
+Saldo/KPI:         ██████████ 100% (1/1) ✅
 Admin:             ░░░░░░░░░░  0% (0/10)
 Relatórios:        ░░░░░░░░░░  0% (0/2)
-KPI/Saldo:         ░░░░░░░░░░  0% (0/1)
 ────────────────────────────────────
-TOTAL:             ░░░░░░░░░░  9% (1/23)
+TOTAL:             ████░░░░░░ 26% (5/19)
 ```
 
 ---

@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { User } from '@/types';
+import { Trash2 } from 'lucide-react';
 
 interface CreatedUser extends User {
   temp_password?: string;
@@ -28,6 +29,8 @@ export default function UsuariosPage() {
   const [editingPassword, setEditingPassword] = useState<PasswordChangeState | null>(null);
   const [passwordSubmitting, setPasswordSubmitting] = useState(false);
   const [passwordResult, setPasswordResult] = useState<{ user_id: string; temp_password?: string } | null>(null);
+  const [clearingUser, setClearingUser] = useState<{ id: string; name: string } | null>(null);
+  const [clearLoading, setClearLoading] = useState(false);
 
   useEffect(() => {
     fetchUsers();
@@ -149,6 +152,40 @@ export default function UsuariosPage() {
       setError(err.message);
     } finally {
       setPasswordSubmitting(false);
+    }
+  };
+
+  const handleClearTransactions = async () => {
+    if (!clearingUser) return;
+
+    setClearLoading(true);
+
+    try {
+      const res = await fetch('/api/admin/transacoes/limpar', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          usuario_id: clearingUser.id,
+          confirmar: true,
+        }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        setError(data.error || 'Erro ao limpar transações');
+        setClearLoading(false);
+        return;
+      }
+
+      const data = await res.json();
+      setClearingUser(null);
+      setError('');
+      alert(`✅ ${data.data.deletadas} transações deletadas com sucesso!`);
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setClearLoading(false);
     }
   };
 
@@ -417,9 +454,62 @@ export default function UsuariosPage() {
                   >
                     🗑️ Deletar
                   </button>
+                  <button
+                    onClick={() => setClearingUser({ id: u.id, name: u.nome })}
+                    className="px-3 py-1 text-xs font-semibold rounded bg-warning-100 dark:bg-warning-900/30 text-warning-700 dark:text-warning-400 hover:bg-warning-200 dark:hover:bg-warning-800/50 transition-colors"
+                  >
+                    🧹 Limpar
+                  </button>
                 </div>
               </div>
             ))}
+          </div>
+        )}
+
+        {/* Clear Transactions Modal */}
+        {clearingUser && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white dark:bg-neutral-800 rounded-xl shadow-lg max-w-md w-full p-6 space-y-4">
+              <h2 className="text-xl font-black text-neutral-900 dark:text-neutral-100">⚠️ Limpar Despesas</h2>
+              
+              <div className="bg-danger-50 dark:bg-danger-900/20 border border-danger-200 dark:border-danger-700/50 rounded-lg p-4">
+                <p className="text-sm text-neutral-700 dark:text-neutral-300 mb-2">
+                  <strong>Atenção:</strong> Isto vai deletar <strong>TODAS</strong> as despesas de <strong>{clearingUser.name}</strong>.
+                </p>
+                <p className="text-xs text-danger-600 dark:text-danger-400 font-semibold">
+                  ⚠️ Esta ação <strong>NÃO PODE SER DESFEITA</strong>!
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    id="confirm-clear"
+                    className="w-4 h-4 rounded cursor-pointer"
+                  />
+                  <span className="text-sm text-neutral-700 dark:text-neutral-300">
+                    Confirmo que desejo deletar todas as despesas
+                  </span>
+                </label>
+              </div>
+
+              <div className="flex gap-2">
+                <button
+                  onClick={handleClearTransactions}
+                  disabled={!((document.getElementById('confirm-clear') as HTMLInputElement)?.checked) || clearLoading}
+                  className="flex-1 py-2 bg-danger-600 hover:bg-danger-700 disabled:bg-neutral-400 dark:disabled:bg-neutral-600 text-white font-semibold rounded-lg transition-colors disabled:cursor-not-allowed"
+                >
+                  {clearLoading ? 'Limpando...' : 'Deletar Tudo'}
+                </button>
+                <button
+                  onClick={() => setClearingUser(null)}
+                  className="flex-1 py-2 bg-neutral-300 dark:bg-neutral-700 hover:bg-neutral-400 dark:hover:bg-neutral-600 text-neutral-900 dark:text-neutral-100 font-semibold rounded-lg transition-colors"
+                >
+                  Cancelar
+                </button>
+              </div>
+            </div>
           </div>
         )}
 

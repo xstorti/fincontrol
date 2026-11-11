@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { LoadingSpinner, ErrorAlert } from '@/components';
 import { User } from '@/types';
-import { Users, TrendingUp, Wallet, Mail, BarChart3, ArrowLeft, LogOut, Key, Trash2 } from 'lucide-react';
+import { Users, TrendingUp, Wallet, Mail, BarChart3, ArrowLeft, LogOut, Key } from 'lucide-react';
 
 interface FamilyStats {
   total_usuarios: number;
@@ -19,9 +19,6 @@ export default function AdminPage() {
   const [stats, setStats] = useState<FamilyStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [showClearModal, setShowClearModal] = useState(false);
-  const [clearingUser, setClearingUser] = useState<{ id: string; name: string } | null>(null);
-  const [clearLoading, setClearLoading] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -58,47 +55,6 @@ export default function AdminPage() {
   const handleLogout = async () => {
     await fetch('/api/auth/logout', { method: 'POST' });
     router.push('/login');
-  };
-
-  const handleClearTransactions = async () => {
-    if (!clearingUser) return;
-
-    setClearLoading(true);
-    setError('');
-
-    try {
-      const res = await fetch('/api/admin/transacoes/limpar', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({
-          usuario_id: clearingUser.id,
-          confirmar: true,
-        }),
-      });
-
-      if (!res.ok) {
-        const data = await res.json();
-        setError(data.error || 'Erro ao limpar transações');
-        return;
-      }
-
-      const data = await res.json();
-      setShowClearModal(false);
-      setClearingUser(null);
-      alert(`✅ ${data.data.deletadas} transações deletadas com sucesso!`);
-
-      // Reload stats
-      const statsRes = await fetch('/api/admin/stats');
-      if (statsRes.ok) {
-        const statsData = await statsRes.json();
-        setStats(statsData.data);
-      }
-    } catch (err: any) {
-      setError(err.message);
-    } finally {
-      setClearLoading(false);
-    }
   };
 
   if (loading) {
@@ -263,77 +219,13 @@ export default function AdminPage() {
         </div>
 
         {/* Back to Dashboard */}
-        <div className="flex gap-3">
-          <Link
-            href="/dashboard"
-            className="inline-flex items-center gap-2 px-6 py-3 bg-neutral-600 hover:bg-neutral-700 text-white font-semibold rounded-lg transition-all duration-300 hover-lift"
-          >
-            <ArrowLeft size={18} />
-            Voltar ao Dashboard
-          </Link>
-
-          <button
-            onClick={() => {
-              setClearingUser({ id: user!.id, name: user!.nome });
-              setShowClearModal(true);
-            }}
-            className="inline-flex items-center gap-2 px-6 py-3 bg-danger-600 hover:bg-danger-700 text-white font-semibold rounded-lg transition-all duration-300 hover-lift"
-          >
-            <Trash2 size={18} />
-            Limpar Despesas
-          </button>
-        </div>
-
-        {/* Clear Transactions Modal */}
-        {showClearModal && clearingUser && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-xl shadow-lg max-w-md w-full p-6 space-y-4">
-              <h2 className="text-xl font-black text-neutral-900">⚠️ Limpar Despesas</h2>
-              
-              <div className="bg-danger-50 border border-danger-200 rounded-lg p-4">
-                <p className="text-sm text-neutral-700 mb-2">
-                  <strong>Atenção:</strong> Isto vai deletar <strong>TODAS</strong> as despesas do usuário <strong>{clearingUser.name}</strong>.
-                </p>
-                <p className="text-xs text-danger-600 font-semibold">
-                  ⚠️ Esta ação <strong>NÃO PODE SER DESFEITA</strong>!
-                </p>
-              </div>
-
-              <div className="space-y-2">
-                <label className="flex items-center gap-2">
-                  <input
-                    type="checkbox"
-                    id="confirm-clear"
-                    required
-                    className="w-4 h-4"
-                  />
-                  <span className="text-sm text-neutral-700">
-                    Confirmo que desejo deletar todas as despesas
-                  </span>
-                </label>
-              </div>
-
-              <div className="flex gap-2">
-                <button
-                  onClick={handleClearTransactions}
-                  disabled={!((document.getElementById('confirm-clear') as HTMLInputElement)?.checked) || clearLoading}
-                  className="flex-1 py-2 bg-danger-600 hover:bg-danger-700 disabled:bg-neutral-400 text-white font-semibold rounded-lg transition-colors disabled:cursor-not-allowed"
-                >
-                  {clearLoading ? 'Limpando...' : 'Deletar Tudo'}
-                </button>
-                <button
-                  onClick={() => {
-                    setShowClearModal(false);
-                    setClearingUser(null);
-                  }}
-                  className="flex-1 py-2 bg-neutral-300 hover:bg-neutral-400 text-neutral-900 font-semibold rounded-lg transition-colors"
-                >
-                  Cancelar
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
+        <Link
+          href="/dashboard"
+          className="inline-flex items-center gap-2 px-6 py-3 bg-neutral-600 hover:bg-neutral-700 text-white font-semibold rounded-lg transition-all duration-300 hover-lift"
+        >
+          <ArrowLeft size={18} />
+          Voltar ao Dashboard
+        </Link>
       </main>
     </div>
   );

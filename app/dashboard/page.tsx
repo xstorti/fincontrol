@@ -94,23 +94,23 @@ export default function DashboardPage() {
 
         {/* Welcome Section */}
         <div className="space-y-2 animate-blur-in">
-          <p className="text-neutral-400 font-medium text-sm">Bem-vindo de volta</p>
-          <h2 className="text-4xl font-black text-white">
+          <p className="text-neutral-400 font-medium text-xs sm:text-sm">Bem-vindo de volta</p>
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-white">
             Olá, {user?.nome}! 👋
           </h2>
         </div>
 
         {/* KPI Cards Section */}
         {kpi && (
-          <div className="space-y-6">
+          <div className="space-y-4 sm:space-y-6 lg:space-y-6">
             {/* Main Balance Card - Premium */}
             <div className="group relative">
               <div className="absolute inset-0 bg-gradient-to-r from-primary-500/20 to-secondary-500/20 rounded-3xl blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-              <div className="relative bg-gradient-to-br from-primary-600 to-primary-800 dark:from-primary-700 dark:to-primary-900 rounded-3xl shadow-2xl p-8 text-white border border-primary-500/20">
+              <div className="relative bg-gradient-to-br from-primary-600 to-primary-800 dark:from-primary-700 dark:to-primary-900 rounded-3xl shadow-2xl p-4 sm:p-6 lg:p-8 text-white border border-primary-500/20">
                 <div className="flex items-start justify-between mb-6">
                   <div>
                     <p className="text-primary-100 text-sm font-bold uppercase tracking-wide mb-2">Saldo Atual</p>
-                    <p className="text-5xl font-black">
+                    <p className="text-3xl sm:text-4xl lg:text-5xl font-black">
                       R$ {Math.abs(kpi.saldo_atual).toFixed(2)}
                     </p>
                   </div>
@@ -152,7 +152,7 @@ export default function DashboardPage() {
             {/* Stats Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {/* Expenses */}
-              <div className="group bg-neutral-800/50 dark:bg-neutral-800/50 backdrop-blur-sm rounded-2xl border border-neutral-700/50 hover:border-danger-500/50 p-6 transition-all duration-300 hover-lift">
+              <div className="group bg-neutral-800/50 dark:bg-neutral-800/50 backdrop-blur-sm rounded-2xl border border-neutral-700/50 hover:border-danger-500/50 p-4 sm:p-5 lg:p-6 transition-all duration-300 hover-lift">
                 <div className="flex items-center gap-4 mb-4">
                   <div className="p-3 bg-danger-500/10 rounded-lg group-hover:bg-danger-500/20 transition-colors">
                     <TrendingDown className="w-6 h-6 text-danger-400" />
@@ -162,13 +162,13 @@ export default function DashboardPage() {
                     <p className="text-xs text-neutral-500">{dias} dias</p>
                   </div>
                 </div>
-                <p className="text-3xl font-black text-danger-400">
+                <p className="text-2xl sm:text-3xl font-black text-danger-400">
                   R$ {kpi.gasto_periodo.toFixed(2)}
                 </p>
               </div>
 
               {/* Average per day */}
-              <div className="group bg-neutral-800/50 dark:bg-neutral-800/50 backdrop-blur-sm rounded-2xl border border-neutral-700/50 hover:border-warning-500/50 p-6 transition-all duration-300 hover-lift">
+              <div className="group bg-neutral-800/50 dark:bg-neutral-800/50 backdrop-blur-sm rounded-2xl border border-neutral-700/50 hover:border-warning-500/50 p-4 sm:p-5 lg:p-6 transition-all duration-300 hover-lift">
                 <div className="flex items-center gap-4 mb-4">
                   <div className="p-3 bg-warning-500/10 rounded-lg group-hover:bg-warning-500/20 transition-colors">
                     <BarChart3 className="w-6 h-6 text-warning-400" />
@@ -178,7 +178,7 @@ export default function DashboardPage() {
                     <p className="text-xs text-neutral-500">por dia</p>
                   </div>
                 </div>
-                <p className="text-3xl font-black text-warning-400">
+                <p className="text-2xl sm:text-3xl font-black text-warning-400">
                   R$ {kpi.media_dia.toFixed(2)}
                 </p>
               </div>
@@ -189,7 +189,7 @@ export default function DashboardPage() {
         {/* Add Expense Button */}
         <Link
           href="/adicionar-gasto"
-          className="group flex w-full py-4 px-6 bg-gradient-to-r from-primary-600 to-secondary-600 hover:from-primary-500 hover:to-secondary-500 text-white font-bold rounded-xl transition-all duration-300 shadow-lg shadow-primary-500/30 hover:shadow-xl hover:shadow-primary-500/40 items-center justify-center gap-3 hover-lift"
+          className="group flex w-full py-3 sm:py-4 px-4 sm:px-6 bg-gradient-to-r from-primary-600 to-secondary-600 hover:from-primary-500 hover:to-secondary-500 text-white font-bold text-sm sm:text-base rounded-xl transition-all duration-300 shadow-lg shadow-primary-500/30 hover:shadow-xl hover:shadow-primary-500/40 items-center justify-center gap-3 hover-lift"
         >
           <Plus size={20} className="transition-transform group-hover:scale-110" />
           <span>Adicionar Despesa</span>
@@ -198,25 +198,25 @@ export default function DashboardPage() {
 
         {/* Transactions Section */}
         <div className="space-y-4">
-          <h3 className="text-lg font-black text-white">
+          <h3 className="text-lg sm:text-xl font-black text-white">
             Últimas Transações
           </h3>
 
           {transactions.length === 0 ? (
-            <div className="bg-neutral-800/50 backdrop-blur-sm rounded-2xl border border-neutral-700/50 p-12 text-center">
-              <p className="text-neutral-400 font-medium">Nenhuma transação no período</p>
-              <p className="text-neutral-500 text-sm mt-2">Adicione uma despesa para começar</p>
+            <div className="bg-neutral-800/50 backdrop-blur-sm rounded-2xl border border-neutral-700/50 p-6 sm:p-12 text-center">
+              <p className="text-neutral-400 font-medium text-sm sm:text-base">Nenhuma transação no período</p>
+              <p className="text-neutral-500 text-xs sm:text-sm mt-2">Adicione uma despesa para começar</p>
             </div>
           ) : (
             <div className="space-y-3">
               {transactions.map((tx) => (
                 <div
                   key={tx.id}
-                  className="group bg-neutral-800/50 dark:bg-neutral-800/50 backdrop-blur-sm rounded-xl border border-neutral-700/50 hover:border-primary-500/50 p-4 flex items-center justify-between transition-all duration-300 hover:shadow-lg hover:shadow-primary-500/10 hover-lift"
+                  className="group bg-neutral-800/50 dark:bg-neutral-800/50 backdrop-blur-sm rounded-xl border border-neutral-700/50 hover:border-primary-500/50 p-3 sm:p-4 flex items-center justify-between transition-all duration-300 hover:shadow-lg hover:shadow-primary-500/10 hover-lift"
                 >
                   <div className="flex-1 min-w-0">
-                    <p className="font-semibold text-neutral-100 truncate group-hover:text-white transition-colors">{tx.descricao}</p>
-                    <p className="text-xs text-neutral-500 mt-1.5">
+                    <p className="font-semibold text-neutral-100 text-sm sm:text-base truncate group-hover:text-white transition-colors">{tx.descricao}</p>
+                    <p className="text-xs text-neutral-500 mt-1">
                       {new Date(tx.data).toLocaleDateString('pt-BR', { 
                         month: 'short', 
                         day: 'numeric',
@@ -225,7 +225,7 @@ export default function DashboardPage() {
                     </p>
                   </div>
                   <div className="text-right ml-4 shrink-0">
-                    <p className="text-lg font-black text-danger-400">
+                    <p className="text-base sm:text-lg font-black text-danger-400">
                       -R$ {tx.valor.toFixed(2)}
                     </p>
                   </div>

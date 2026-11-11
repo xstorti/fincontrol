@@ -28,7 +28,7 @@ export async function GET(
       return createErrorResponse('Erro ao buscar créditos', 500);
     }
 
-    const response: ApiResponse = {
+    const response: ApiResponse<Credit[]> = {
       success: true,
       data: credits || [],
     };

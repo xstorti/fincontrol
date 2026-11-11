@@ -59,7 +59,7 @@ export async function PUT(
       return createErrorResponse('Erro ao atualizar crédito', 500);
     }
 
-    const response: ApiResponse = {
+    const response: ApiResponse<Credit> = {
       success: true,
       data: updated,
       message: 'Crédito atualizado com sucesso',
@@ -107,7 +107,7 @@ export async function DELETE(
       return createErrorResponse('Erro ao deletar crédito', 500);
     }
 
-    const response: ApiResponse = {
+    const response: ApiResponse<null> = {
       success: true,
       message: 'Crédito deletado com sucesso',
     };

@@ -5,7 +5,7 @@ import { ApiResponse, Credit } from '@/types';
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { user, error } = await withAdminAuth(req);
@@ -14,7 +14,7 @@ export async function GET(
       return createErrorResponse('Acesso negado', 403);
     }
 
-    const { id } = params;
+    const { id } = await params;
 
     // Get user's credits
     const { data: credits, error: fetchError } = await supabaseAdmin
@@ -28,7 +28,7 @@ export async function GET(
       return createErrorResponse('Erro ao buscar créditos', 500);
     }
 
-    const response: ApiResponse<Credit[]> = {
+    const response: ApiResponse = {
       success: true,
       data: credits || [],
     };

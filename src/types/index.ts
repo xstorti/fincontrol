@@ -11,6 +11,7 @@ export interface User {
 
 // Credit/Saldo type
 export interface Credit {
+  id?: string;
   usuario_id: string;
   data_creditada: string;
   valor: number;

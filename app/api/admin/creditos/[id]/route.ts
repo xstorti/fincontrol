@@ -5,7 +5,7 @@ import { ApiResponse, Credit } from '@/types';
 
 export async function PUT(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { user, error } = await withAdminAuth(req);
@@ -14,7 +14,7 @@ export async function PUT(
       return createErrorResponse('Acesso negado', 403);
     }
 
-    const { id } = params;
+    const { id } = await params;
     const body = await req.json();
     const { valor, descricao } = body;
 
@@ -59,7 +59,7 @@ export async function PUT(
       return createErrorResponse('Erro ao atualizar crédito', 500);
     }
 
-    const response: ApiResponse<Credit> = {
+    const response: ApiResponse = {
       success: true,
       data: updated,
       message: 'Crédito atualizado com sucesso',
@@ -74,7 +74,7 @@ export async function PUT(
 
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { user, error } = await withAdminAuth(req);
@@ -83,7 +83,7 @@ export async function DELETE(
       return createErrorResponse('Acesso negado', 403);
     }
 
-    const { id } = params;
+    const { id } = await params;
 
     // Check if credit exists
     const { data: credit, error: fetchError } = await supabaseAdmin

@@ -142,8 +142,8 @@ export default function LoginPage() {
         </div>
 
         {/* Footer */}
-        <p className="text-center text-xs text-neutral-500 mt-8 font-medium">
-          © 2024 FinControl • Controle Financeiro Familiar
+        <p className="text-center text-xs text-neutral-400 opacity-60 mt-8">
+          by XStorti • v1.0
         </p>
       </div>
     </div>

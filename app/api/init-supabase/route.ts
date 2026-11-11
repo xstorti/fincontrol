@@ -3,11 +3,23 @@ import { supabaseAdmin } from '@/lib/supabase';
 import { hashPassword } from '@/lib/auth';
 
 export async function POST(req: NextRequest) {
-  // Only allow in development
-  if (process.env.NODE_ENV === 'production') {
+  // Only allow with secret key (works in dev and prod)
+  const authHeader = req.headers.get('Authorization');
+  const expectedToken = process.env.INIT_SECRET || 'dev-secret-key';
+  
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
     return NextResponse.json(
-      { error: 'Not available in production' },
-      { status: 403 }
+      { error: 'Unauthorized - missing Authorization header' },
+      { status: 401 }
+    );
+  }
+
+  const token = authHeader.substring(7); // Remove 'Bearer ' prefix
+  
+  if (token !== expectedToken) {
+    return NextResponse.json(
+      { error: 'Unauthorized - invalid token' },
+      { status: 401 }
     );
   }
 

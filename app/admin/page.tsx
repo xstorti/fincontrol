@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { LoadingSpinner, ErrorAlert } from '@/components';
 import { User } from '@/types';
 import { Users, TrendingUp, Wallet, Mail, BarChart3, ArrowLeft, LogOut, Key } from 'lucide-react';
+import { PieChart, Pie, Cell, Legend, Tooltip, ResponsiveContainer } from 'recharts';
 
 interface FamilyStats {
   total_usuarios: number;
@@ -13,10 +14,19 @@ interface FamilyStats {
   saldo_total: number;
 }
 
+interface DespesasData {
+  acumuladas: Array<{ usuario_id: string; nome: string; total: number }>;
+  dia: Array<{ usuario_id: string; nome: string; total: number }>;
+}
+
+// Cores para os gráficos
+const COLORS = ['#2563eb', '#dc2626', '#16a34a', '#f59e0b', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316'];
+
 export default function AdminPage() {
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
   const [stats, setStats] = useState<FamilyStats | null>(null);
+  const [despesas, setDespesas] = useState<DespesasData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -37,10 +47,19 @@ export default function AdminPage() {
           return;
         }
 
-        const statsRes = await fetch('/api/admin/stats');
+        const [statsRes, despesasRes] = await Promise.all([
+          fetch('/api/admin/stats'),
+          fetch('/api/admin/stats/despesas'),
+        ]);
+
         if (statsRes.ok) {
           const statsData = await statsRes.json();
           setStats(statsData.data);
+        }
+
+        if (despesasRes.ok) {
+          const despesasData = await despesasRes.json();
+          setDespesas(despesasData.data);
         }
       } catch (err: any) {
         setError(err.message || 'Erro ao carregar dados');
@@ -164,6 +183,105 @@ export default function AdminPage() {
                 </div>
               </div>
             </div>
+          </div>
+        )}
+
+        {/* Gráficos de Despesas */}
+        {despesas && (
+          <div className="space-y-8 mb-8 sm:mb-10">
+            {/* Gráfico Despesas Acumuladas */}
+            {despesas.acumuladas.length > 0 && (
+              <div className="bg-white rounded-2xl shadow-sm hover:shadow-md transition-all border border-neutral-100 p-4 sm:p-6">
+                <h3 className="text-lg sm:text-xl font-black text-neutral-900 mb-6">
+                  📊 Despesas Acumuladas por Usuário
+                </h3>
+                <div className="w-full h-80">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie
+                        data={despesas.acumuladas.map((d) => ({
+                          name: d.nome,
+                          value: parseFloat(d.total.toFixed(2)),
+                        }))}
+                        cx="50%"
+                        cy="50%"
+                        labelLine={false}
+                        label={({ name, value }) => `${name}: ${((value / despesas.acumuladas.reduce((sum, d) => sum + d.total, 0)) * 100).toFixed(0)}%`}
+                        outerRadius={120}
+                        fill="#8884d8"
+                        dataKey="value"
+                      >
+                        {despesas.acumuladas.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                        ))}
+                      </Pie>
+                      <Tooltip
+                        formatter={(value: any) => `R$ ${typeof value === 'number' ? value.toFixed(2) : parseFloat(String(value || 0)).toFixed(2)}`}
+                        contentStyle={{
+                          backgroundColor: '#ffffff',
+                          border: '1px solid #e5e7eb',
+                          borderRadius: '8px',
+                          color: '#000000',
+                        }}
+                      />
+                      <Legend />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
+                <div className="mt-4 p-4 bg-neutral-50 rounded-lg">
+                  <p className="text-sm text-neutral-700 font-medium">
+                    Total Acumulado: <span className="text-danger-600 font-black">R$ {despesas.acumuladas.reduce((sum, d) => sum + d.total, 0).toFixed(2)}</span>
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* Gráfico Despesas do Dia */}
+            {despesas.dia.length > 0 && (
+              <div className="bg-white rounded-2xl shadow-sm hover:shadow-md transition-all border border-neutral-100 p-4 sm:p-6">
+                <h3 className="text-lg sm:text-xl font-black text-neutral-900 mb-6">
+                  📈 Despesas do Dia por Usuário
+                </h3>
+                <div className="w-full h-80">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie
+                        data={despesas.dia.map((d) => ({
+                          name: d.nome,
+                          value: parseFloat(d.total.toFixed(2)),
+                        }))}
+                        cx="50%"
+                        cy="50%"
+                        labelLine={false}
+                        label={({ name, value }) => `${name}: ${((value / despesas.dia.reduce((sum, d) => sum + d.total, 0)) * 100).toFixed(0)}%`}
+                        outerRadius={120}
+                        fill="#8884d8"
+                        dataKey="value"
+                      >
+                        {despesas.dia.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                        ))}
+                      </Pie>
+                      <Tooltip
+                        formatter={(value: any) => `R$ ${typeof value === 'number' ? value.toFixed(2) : parseFloat(String(value || 0)).toFixed(2)}`}
+                        contentStyle={{
+                          backgroundColor: '#ffffff',
+                          border: '1px solid #e5e7eb',
+                          borderRadius: '8px',
+                          color: '#000000',
+                        }}
+                      />
+                      <Legend />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
+                <div className="mt-4 p-4 bg-neutral-50 rounded-lg">
+                  <p className="text-sm text-neutral-700 font-medium">
+                    Total do Dia: <span className="text-danger-600 font-black">R$ {despesas.dia.reduce((sum, d) => sum + d.total, 0).toFixed(2)}</span>
+                  </p>
+                </div>
+              </div>
+            )}
           </div>
         )}
 

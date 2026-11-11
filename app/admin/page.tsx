@@ -111,11 +111,11 @@ export default function AdminPage() {
             <div className="group bg-white rounded-2xl shadow-sm hover:shadow-md transition-all border border-neutral-100 p-4 sm:p-6 hover-lift">
               <div className="flex items-start justify-between">
                 <div>
-                  <p className="text-sm font-medium text-neutral-600 uppercase tracking-wide">Total de Usuários</p>
-                  <p className="text-2xl sm:text-4xl font-black text-primary-900 mt-2 sm:mt-3">{stats.total_usuarios}</p>
+                  <p className="text-xs sm:text-sm font-semibold text-neutral-700 uppercase tracking-widest">Total de Usuários</p>
+                  <p className="text-3xl sm:text-5xl font-black text-neutral-950 mt-3 sm:mt-4 leading-none" style={{textShadow: '0 0 10px rgba(0,0,0,0.1)'}}>{stats.total_usuarios}</p>
                 </div>
-                <div className="p-3 bg-primary-50 rounded-xl group-hover:bg-primary-100 transition-colors">
-                  <Users className="w-6 h-6 text-primary-900" />
+                <div className="p-3 bg-primary-100 rounded-xl group-hover:bg-primary-200 transition-colors">
+                  <Users className="w-8 h-8 text-primary-950" />
                 </div>
               </div>
             </div>
@@ -124,13 +124,13 @@ export default function AdminPage() {
             <div className="group bg-white rounded-2xl shadow-sm hover:shadow-md transition-all border border-neutral-100 p-4 sm:p-6 hover-lift">
               <div className="flex items-start justify-between">
                 <div>
-                  <p className="text-sm font-medium text-neutral-600 uppercase tracking-wide">Gasto (7 dias)</p>
-                  <p className="text-2xl sm:text-4xl font-black text-danger-900 mt-2 sm:mt-3">
+                  <p className="text-xs sm:text-sm font-semibold text-neutral-700 uppercase tracking-widest">Gasto (7 dias)</p>
+                  <p className="text-3xl sm:text-5xl font-black text-neutral-950 mt-3 sm:mt-4 leading-none" style={{textShadow: '0 0 10px rgba(0,0,0,0.1)'}}>
                     R$ {stats.gasto_total_7_dias.toFixed(2)}
                   </p>
                 </div>
-                <div className="p-3 bg-danger-50 rounded-xl group-hover:bg-danger-100 transition-colors">
-                  <TrendingUp className="w-6 h-6 text-danger-900" />
+                <div className="p-3 bg-danger-100 rounded-xl group-hover:bg-danger-200 transition-colors">
+                  <TrendingUp className="w-8 h-8 text-danger-950" />
                 </div>
               </div>
             </div>
@@ -139,19 +139,19 @@ export default function AdminPage() {
             <div className="group bg-white rounded-2xl shadow-sm hover:shadow-md transition-all border border-neutral-100 p-4 sm:p-6 hover-lift">
               <div className="flex items-start justify-between">
                 <div>
-                  <p className="text-sm font-medium text-neutral-600 uppercase tracking-wide">Saldo Total</p>
-                  <p className={`text-2xl sm:text-4xl font-black mt-2 sm:mt-3 ${
-                    stats.saldo_total >= 0 ? 'text-success-900' : 'text-danger-900'
-                  }`}>
+                  <p className="text-xs sm:text-sm font-semibold text-neutral-700 uppercase tracking-widest">Saldo Total</p>
+                  <p className={`text-3xl sm:text-5xl font-black mt-3 sm:mt-4 leading-none ${
+                    stats.saldo_total >= 0 ? 'text-neutral-950' : 'text-neutral-950'
+                  }`} style={{textShadow: '0 0 10px rgba(0,0,0,0.1)'}}>
                     R$ {stats.saldo_total.toFixed(2)}
                   </p>
                 </div>
                 <div className={`p-3 rounded-xl transition-colors ${
                   stats.saldo_total >= 0 
-                    ? 'bg-success-50 group-hover:bg-success-100' 
-                    : 'bg-danger-50 group-hover:bg-danger-100'
+                    ? 'bg-success-100 group-hover:bg-success-200' 
+                    : 'bg-danger-100 group-hover:bg-danger-200'
                 }`}>
-                  <Wallet className={`w-6 h-6 ${stats.saldo_total >= 0 ? 'text-success-900' : 'text-danger-900'}`} />
+                  <Wallet className={`w-8 h-8 ${stats.saldo_total >= 0 ? 'text-success-950' : 'text-danger-950'}`} />
                 </div>
               </div>
             </div>
@@ -165,10 +165,10 @@ export default function AdminPage() {
             href="/admin/usuarios"
             className="group block p-4 sm:p-6 bg-white rounded-xl shadow-sm hover:shadow-lg border border-neutral-100 hover:border-primary-200 transition-all hover-lift"
           >
-            <div className="p-3 bg-primary-50 rounded-lg w-fit mb-4 group-hover:bg-primary-100 transition-colors">
-              <Users className="w-6 h-6 text-primary-900" />
+            <div className="p-3 bg-primary-100 rounded-lg w-fit mb-4 group-hover:bg-primary-200 transition-colors">
+              <Users className="w-8 h-8 text-primary-950" />
             </div>
-            <h3 className="font-bold text-neutral-900 mb-1">Usuários</h3>
+            <h3 className="font-black text-neutral-950 mb-1 text-lg">Usuários</h3>
             <p className="text-xs text-neutral-600 leading-relaxed">Criar, editar, ativar/desativar</p>
           </Link>
 
@@ -177,10 +177,10 @@ export default function AdminPage() {
             href="/admin/creditos"
             className="group block p-4 sm:p-6 bg-white rounded-xl shadow-sm hover:shadow-lg border border-neutral-100 hover:border-success-200 transition-all hover-lift"
           >
-            <div className="p-3 bg-success-50 rounded-lg w-fit mb-4 group-hover:bg-success-100 transition-colors">
-              <Wallet className="w-6 h-6 text-success-900" />
+            <div className="p-3 bg-success-100 rounded-lg w-fit mb-4 group-hover:bg-success-200 transition-colors">
+              <Wallet className="w-8 h-8 text-success-950" />
             </div>
-            <h3 className="font-bold text-neutral-900 mb-1">Créditos</h3>
+            <h3 className="font-black text-neutral-950 mb-1 text-lg">Créditos</h3>
             <p className="text-xs text-neutral-600 leading-relaxed">Adicionar saldo para usuários</p>
           </Link>
 
@@ -189,10 +189,10 @@ export default function AdminPage() {
             href="/admin/emails"
             className="group block p-4 sm:p-6 bg-white rounded-xl shadow-sm hover:shadow-lg border border-neutral-100 hover:border-secondary-200 transition-all hover-lift"
           >
-            <div className="p-3 bg-secondary-50 rounded-lg w-fit mb-4 group-hover:bg-secondary-100 transition-colors">
-              <Mail className="w-6 h-6 text-secondary-900" />
+            <div className="p-3 bg-secondary-100 rounded-lg w-fit mb-4 group-hover:bg-secondary-200 transition-colors">
+              <Mail className="w-8 h-8 text-secondary-950" />
             </div>
-            <h3 className="font-bold text-neutral-900 mb-1">Notificações</h3>
+            <h3 className="font-black text-neutral-950 mb-1 text-lg">Notificações</h3>
             <p className="text-xs text-neutral-600 leading-relaxed">Configurar notificações por email</p>
           </Link>
 
@@ -201,10 +201,10 @@ export default function AdminPage() {
             href="/admin/relatorios"
             className="group block p-4 sm:p-6 bg-white rounded-xl shadow-sm hover:shadow-lg border border-neutral-100 hover:border-warning-200 transition-all hover-lift"
           >
-            <div className="p-3 bg-warning-50 rounded-lg w-fit mb-4 group-hover:bg-warning-100 transition-colors">
-              <BarChart3 className="w-6 h-6 text-warning-900" />
+            <div className="p-3 bg-warning-100 rounded-lg w-fit mb-4 group-hover:bg-warning-200 transition-colors">
+              <BarChart3 className="w-8 h-8 text-warning-950" />
             </div>
-            <h3 className="font-bold text-neutral-900 mb-1">Relatórios</h3>
+            <h3 className="font-black text-neutral-950 mb-1 text-lg">Relatórios</h3>
             <p className="text-xs text-neutral-600 leading-relaxed">Visualizar e exportar dados</p>
           </Link>
         </div>

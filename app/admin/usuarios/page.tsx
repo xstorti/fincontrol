@@ -178,7 +178,7 @@ export default function UsuariosPage() {
         {/* Add Button */}
         <button
           onClick={() => setShowForm(!showForm)}
-          className="w-full py-2 bg-primary-600 hover:bg-primary-700 dark:bg-primary-500 dark:hover:bg-primary-600 text-white font-semibold rounded-lg transition-colors"
+          className="w-full py-3 bg-neutral-700 hover:bg-neutral-800 text-white font-black rounded-lg transition-colors shadow-md hover:shadow-lg"
         >
           {showForm ? '✕ Cancelar' : '+ Novo Usuário'}
         </button>
@@ -226,7 +226,7 @@ export default function UsuariosPage() {
             <button
               type="submit"
               disabled={submitting}
-              className="w-full py-2 bg-primary-600 hover:bg-primary-700 dark:bg-primary-500 dark:hover:bg-primary-600 disabled:bg-neutral-400 dark:disabled:bg-neutral-700 text-white font-semibold rounded-lg transition-colors"
+              className="w-full py-3 bg-neutral-700 hover:bg-neutral-800 disabled:bg-neutral-500 text-white font-black rounded-lg transition-colors shadow-md hover:shadow-lg disabled:cursor-not-allowed"
             >
               {submitting ? 'Criando...' : 'Criar Usuário'}
             </button>

@@ -78,7 +78,7 @@ export default function AdicionarGastoPage() {
 
       {/* Main Content */}
       <main className="flex-1 max-w-md mx-auto w-full px-4 py-8">
-        <h2 className="text-2xl font-bold text-neutral-900 dark:text-neutral-100 mb-6">Adicionar Gasto</h2>
+        <h2 className="text-xl sm:text-2xl font-bold text-neutral-900 dark:text-neutral-100 mb-6">Adicionar Gasto</h2>
 
         {/* Success Alert */}
         {success && <SuccessAlert message="Gasto adicionado!" details="Redirecionando para o dashboard..." />}
@@ -87,7 +87,7 @@ export default function AdicionarGastoPage() {
         {error && <ErrorAlert message="Erro ao adicionar gasto" details={error} />}
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="space-y-6 bg-white dark:bg-neutral-800 rounded-lg shadow dark:shadow-dark-md p-6">
+        <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6 bg-white dark:bg-neutral-800 rounded-lg shadow dark:shadow-dark-md p-4 sm:p-6">
           {/* Data */}
           <div>
             <label htmlFor="data" className="block text-sm font-medium text-neutral-900 dark:text-neutral-100 mb-2">

@@ -124,7 +124,7 @@ export default function RelatorioPage() {
       </header>
 
       {/* Main Content */}
-      <main className="flex-1 max-w-md mx-auto w-full px-4 py-6 space-y-6">
+      <main className="flex-1 max-w-2xl mx-auto w-full px-4 py-6 space-y-4 sm:space-y-6">
         {error && (
           <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
             <p className="text-red-700 text-sm">{error}</p>
@@ -132,8 +132,8 @@ export default function RelatorioPage() {
         )}
 
         {/* Filters */}
-        <div className="bg-white rounded-lg shadow p-6 space-y-4">
-          <h3 className="font-bold text-gray-800">Filtrar por Período</h3>
+        <div className="bg-white rounded-lg shadow p-4 sm:p-6 space-y-4">
+          <h3 className="font-bold text-sm sm:text-base text-gray-800">Filtrar por Período</h3>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Data Início</label>

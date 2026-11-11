@@ -99,20 +99,20 @@ export default function AdminPage() {
         {error && <ErrorAlert message="Erro ao carregar dados" details={error} />}
 
         {/* Welcome Section */}
-        <div className="mb-10">
-          <h2 className="text-3xl font-black text-neutral-900 mb-2">Bem-vindo, {user.nome}! 👋</h2>
-          <p className="text-neutral-600 font-medium">Gerencie sua família e controle financeiro</p>
+        <div className="mb-8 sm:mb-10">
+          <h2 className="text-2xl sm:text-3xl font-black text-neutral-900 mb-2">Bem-vindo, {user.nome}! 👋</h2>
+          <p className="text-sm sm:text-base text-neutral-600 font-medium">Gerencie sua família e controle financeiro</p>
         </div>
 
         {/* Stats Cards */}
         {stats && (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 mb-8 sm:mb-10">
             {/* Total Usuários */}
-            <div className="group bg-white rounded-2xl shadow-sm hover:shadow-md transition-all border border-neutral-100 p-6 hover-lift">
+            <div className="group bg-white rounded-2xl shadow-sm hover:shadow-md transition-all border border-neutral-100 p-4 sm:p-6 hover-lift">
               <div className="flex items-start justify-between">
                 <div>
                   <p className="text-sm font-medium text-neutral-600 uppercase tracking-wide">Total de Usuários</p>
-                  <p className="text-4xl font-black text-primary-600 mt-3">{stats.total_usuarios}</p>
+                  <p className="text-2xl sm:text-4xl font-black text-primary-600 mt-2 sm:mt-3">{stats.total_usuarios}</p>
                 </div>
                 <div className="p-3 bg-primary-50 rounded-xl group-hover:bg-primary-100 transition-colors">
                   <Users className="w-6 h-6 text-primary-600" />
@@ -121,11 +121,11 @@ export default function AdminPage() {
             </div>
 
             {/* Gasto 7 dias */}
-            <div className="group bg-white rounded-2xl shadow-sm hover:shadow-md transition-all border border-neutral-100 p-6 hover-lift">
+            <div className="group bg-white rounded-2xl shadow-sm hover:shadow-md transition-all border border-neutral-100 p-4 sm:p-6 hover-lift">
               <div className="flex items-start justify-between">
                 <div>
                   <p className="text-sm font-medium text-neutral-600 uppercase tracking-wide">Gasto (7 dias)</p>
-                  <p className="text-4xl font-black text-danger-600 mt-3">
+                  <p className="text-2xl sm:text-4xl font-black text-danger-600 mt-2 sm:mt-3">
                     R$ {stats.gasto_total_7_dias.toFixed(2)}
                   </p>
                 </div>
@@ -136,11 +136,11 @@ export default function AdminPage() {
             </div>
 
             {/* Saldo Total */}
-            <div className="group bg-white rounded-2xl shadow-sm hover:shadow-md transition-all border border-neutral-100 p-6 hover-lift">
+            <div className="group bg-white rounded-2xl shadow-sm hover:shadow-md transition-all border border-neutral-100 p-4 sm:p-6 hover-lift">
               <div className="flex items-start justify-between">
                 <div>
                   <p className="text-sm font-medium text-neutral-600 uppercase tracking-wide">Saldo Total</p>
-                  <p className={`text-4xl font-black mt-3 ${
+                  <p className={`text-2xl sm:text-4xl font-black mt-2 sm:mt-3 ${
                     stats.saldo_total >= 0 ? 'text-success-600' : 'text-danger-600'
                   }`}>
                     R$ {stats.saldo_total.toFixed(2)}
@@ -159,11 +159,11 @@ export default function AdminPage() {
         )}
 
         {/* Admin Menu */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-8 sm:mb-10">
           {/* Usuários */}
           <Link
             href="/admin/usuarios"
-            className="group block p-6 bg-white rounded-xl shadow-sm hover:shadow-lg border border-neutral-100 hover:border-primary-200 transition-all hover-lift"
+            className="group block p-4 sm:p-6 bg-white rounded-xl shadow-sm hover:shadow-lg border border-neutral-100 hover:border-primary-200 transition-all hover-lift"
           >
             <div className="p-3 bg-primary-50 rounded-lg w-fit mb-4 group-hover:bg-primary-100 transition-colors">
               <Users className="w-6 h-6 text-primary-600" />
@@ -175,7 +175,7 @@ export default function AdminPage() {
           {/* Créditos */}
           <Link
             href="/admin/creditos"
-            className="group block p-6 bg-white rounded-xl shadow-sm hover:shadow-lg border border-neutral-100 hover:border-success-200 transition-all hover-lift"
+            className="group block p-4 sm:p-6 bg-white rounded-xl shadow-sm hover:shadow-lg border border-neutral-100 hover:border-success-200 transition-all hover-lift"
           >
             <div className="p-3 bg-success-50 rounded-lg w-fit mb-4 group-hover:bg-success-100 transition-colors">
               <Wallet className="w-6 h-6 text-success-600" />
@@ -187,7 +187,7 @@ export default function AdminPage() {
           {/* Notificações */}
           <Link
             href="/admin/emails"
-            className="group block p-6 bg-white rounded-xl shadow-sm hover:shadow-lg border border-neutral-100 hover:border-secondary-200 transition-all hover-lift"
+            className="group block p-4 sm:p-6 bg-white rounded-xl shadow-sm hover:shadow-lg border border-neutral-100 hover:border-secondary-200 transition-all hover-lift"
           >
             <div className="p-3 bg-secondary-50 rounded-lg w-fit mb-4 group-hover:bg-secondary-100 transition-colors">
               <Mail className="w-6 h-6 text-secondary-600" />
@@ -199,7 +199,7 @@ export default function AdminPage() {
           {/* Relatórios */}
           <Link
             href="/admin/relatorios"
-            className="group block p-6 bg-white rounded-xl shadow-sm hover:shadow-lg border border-neutral-100 hover:border-warning-200 transition-all hover-lift"
+            className="group block p-4 sm:p-6 bg-white rounded-xl shadow-sm hover:shadow-lg border border-neutral-100 hover:border-warning-200 transition-all hover-lift"
           >
             <div className="p-3 bg-warning-50 rounded-lg w-fit mb-4 group-hover:bg-warning-100 transition-colors">
               <BarChart3 className="w-6 h-6 text-warning-600" />

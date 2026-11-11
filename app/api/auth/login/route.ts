@@ -7,6 +7,7 @@ import { User, ApiResponse } from '@/types';
 
 export async function POST(req: NextRequest) {
   try {
+    // Process login request
     const body = await req.json();
     const { email, senha } = body;
 

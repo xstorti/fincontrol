@@ -259,11 +259,11 @@ export default function DashboardPage() {
         {/* Add Expense Button */}
         <Link
           href="/adicionar-gasto"
-          className="group flex w-full py-3 sm:py-4 px-4 sm:px-6 bg-gradient-to-r from-primary-600 to-secondary-600 hover:from-primary-500 hover:to-secondary-500 text-white font-bold text-sm sm:text-base rounded-xl transition-all duration-300 shadow-lg shadow-primary-500/30 hover:shadow-xl hover:shadow-primary-500/40 items-center justify-center gap-3 hover-lift"
+          className="group flex w-full py-4 sm:py-5 px-6 sm:px-8 bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-500 hover:to-primary-600 text-white font-black text-base sm:text-lg rounded-2xl transition-all duration-300 shadow-2xl shadow-primary-600/50 hover:shadow-2xl hover:shadow-primary-500/70 items-center justify-center gap-3 hover-lift transform hover:scale-105 active:scale-95"
         >
-          <Plus size={20} strokeWidth={2.5} className="transition-transform group-hover:scale-110" />
+          <Plus size={24} strokeWidth={2.5} className="transition-transform group-hover:scale-125 group-hover:rotate-90" />
           <span>Adicionar Despesa</span>
-          <ArrowRight size={18} strokeWidth={2.5} className="opacity-0 -ml-2 transition-all group-hover:opacity-100 group-hover:ml-0" />
+          <ArrowRight size={20} strokeWidth={2.5} className="opacity-0 -ml-2 transition-all group-hover:opacity-100 group-hover:ml-1" />
         </Link>
 
         {/* Transactions Section */}

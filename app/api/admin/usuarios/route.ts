@@ -58,11 +58,16 @@ export async function POST(req: NextRequest) {
     }
 
     // Check if email already exists
-    const { data: existingUser } = await supabaseAdmin
+    const { data: existingUser, error: checkError } = await supabaseAdmin
       .from('users')
       .select('email')
       .eq('email', email)
-      .single();
+      .maybeSingle();
+
+    if (checkError) {
+      console.error('Check email error:', checkError);
+      return createErrorResponse('Erro ao verificar email', 500);
+    }
 
     if (existingUser) {
       return createErrorResponse('Email já cadastrado', 400);

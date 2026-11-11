@@ -103,7 +103,7 @@ export default function DashboardPage() {
         {kpi && (
           <div className="space-y-6">
             {/* Main Balance Card */}
-            <div className="bg-gradient-to-br from-primary-500 to-primary-700 dark:from-primary-600 dark:to-primary-800 rounded-2xl shadow-lg p-8 text-white">
+            <div className="bg-linear-to-br from-primary-500 to-primary-700 dark:from-primary-600 dark:to-primary-800 rounded-2xl shadow-lg p-8 text-white">
               <p className="text-primary-100 text-sm font-medium mb-2">Saldo Atual</p>
               <p className="text-5xl font-bold mb-4">
                 R$ {Math.abs(kpi.saldo_atual).toFixed(2)}
@@ -170,7 +170,7 @@ export default function DashboardPage() {
         {/* Add Expense Button */}
         <Link
           href="/adicionar-gasto"
-          className="block w-full py-4 bg-primary-600 hover:bg-primary-700 dark:bg-primary-500 dark:hover:bg-primary-600 text-white font-semibold rounded-xl text-center transition-colors shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
+          className="flex w-full py-4 bg-primary-600 hover:bg-primary-700 dark:bg-primary-500 dark:hover:bg-primary-600 text-white font-semibold rounded-xl transition-colors shadow-lg hover:shadow-xl items-center justify-center gap-2"
         >
           <Plus size={20} />
           Adicionar Despesa
@@ -199,7 +199,7 @@ export default function DashboardPage() {
                       {new Date(tx.data).toLocaleDateString('pt-BR')}
                     </p>
                   </div>
-                  <p className="text-lg font-semibold text-danger-600 dark:text-danger-500 ml-4 flex-shrink-0">
+                  <p className="text-lg font-semibold text-danger-600 dark:text-danger-500 ml-4 shrink-0">
                     -R$ {tx.valor.toFixed(2)}
                   </p>
                 </div>

@@ -41,7 +41,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-neutral-50 via-primary-50 to-neutral-50 dark:from-neutral-900 dark:via-primary-900/20 dark:to-neutral-900 px-4 py-8 relative">
+    <div className="flex flex-col items-center justify-center min-h-screen bg-linear-to-br from-neutral-50 via-primary-50 to-neutral-50 dark:from-neutral-900 dark:via-primary-900/20 dark:to-neutral-900 px-4 py-8 relative">
       {/* Theme Toggle */}
       <div className="absolute top-4 right-4">
         <ThemeToggle />

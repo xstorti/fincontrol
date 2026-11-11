@@ -1,13 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withAuth, createErrorResponse } from '@/lib/middleware';
 import { supabaseAdmin } from '@/lib/supabase';
-import { readCsv, appendToCsv, deleteCsvRow, readCsv as readAllCsv } from '@/lib/csv';
 import { sendEmail, getTransactionEmailTemplate } from '@/lib/email';
-import { calculateBalance, calculateKPI, getTransactionsByPeriod } from '@/lib/kpi';
-import { generateId, formatDateToISO } from '@/lib/utils';
 import { Transaction, User, ApiResponse } from '@/types';
-import fs from 'fs';
-import path from 'path';
 
 // GET - List transactions
 export async function GET(req: NextRequest) {

@@ -73,14 +73,3 @@ export async function POST(req: NextRequest) {
     return createErrorResponse('Erro ao fazer login', 500);
   }
 }
-      sameSite: 'lax',
-      maxAge: 7 * 24 * 60 * 60, // 7 days
-      path: '/',
-    });
-
-    return response;
-  } catch (error: any) {
-    console.error('Login error:', error);
-    return createErrorResponse('Erro ao fazer login', 500);
-  }
-}

@@ -80,7 +80,7 @@ export default function AdminPage() {
       <header className="bg-white border-b border-neutral-100 sticky top-0 z-10 shadow-sm">
         <div className="max-w-6xl mx-auto px-4 py-4 sm:px-6 lg:px-8 flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-black text-primary-900">FinControl Admin</h1>
+            <h1 className="text-2xl font-black text-neutral-900">FinControl Admin</h1>
             <p className="text-sm text-neutral-600 mt-0.5">Painel de Administração</p>
           </div>
           <button
@@ -112,10 +112,10 @@ export default function AdminPage() {
               <div className="flex items-start justify-between">
                 <div>
                   <p className="text-sm font-medium text-neutral-600 uppercase tracking-wide">Total de Usuários</p>
-                  <p className="text-2xl sm:text-4xl font-black text-primary-600 mt-2 sm:mt-3">{stats.total_usuarios}</p>
+                  <p className="text-2xl sm:text-4xl font-black text-primary-800 mt-2 sm:mt-3">{stats.total_usuarios}</p>
                 </div>
                 <div className="p-3 bg-primary-50 rounded-xl group-hover:bg-primary-100 transition-colors">
-                  <Users className="w-6 h-6 text-primary-600" />
+                  <Users className="w-6 h-6 text-primary-700" />
                 </div>
               </div>
             </div>
@@ -125,12 +125,12 @@ export default function AdminPage() {
               <div className="flex items-start justify-between">
                 <div>
                   <p className="text-sm font-medium text-neutral-600 uppercase tracking-wide">Gasto (7 dias)</p>
-                  <p className="text-2xl sm:text-4xl font-black text-danger-600 mt-2 sm:mt-3">
+                  <p className="text-2xl sm:text-4xl font-black text-danger-700 mt-2 sm:mt-3">
                     R$ {stats.gasto_total_7_dias.toFixed(2)}
                   </p>
                 </div>
                 <div className="p-3 bg-danger-50 rounded-xl group-hover:bg-danger-100 transition-colors">
-                  <TrendingUp className="w-6 h-6 text-danger-600" />
+                  <TrendingUp className="w-6 h-6 text-danger-700" />
                 </div>
               </div>
             </div>
@@ -141,7 +141,7 @@ export default function AdminPage() {
                 <div>
                   <p className="text-sm font-medium text-neutral-600 uppercase tracking-wide">Saldo Total</p>
                   <p className={`text-2xl sm:text-4xl font-black mt-2 sm:mt-3 ${
-                    stats.saldo_total >= 0 ? 'text-success-600' : 'text-danger-600'
+                    stats.saldo_total >= 0 ? 'text-success-700' : 'text-danger-700'
                   }`}>
                     R$ {stats.saldo_total.toFixed(2)}
                   </p>
@@ -151,7 +151,7 @@ export default function AdminPage() {
                     ? 'bg-success-50 group-hover:bg-success-100' 
                     : 'bg-danger-50 group-hover:bg-danger-100'
                 }`}>
-                  <Wallet className={`w-6 h-6 ${stats.saldo_total >= 0 ? 'text-success-600' : 'text-danger-600'}`} />
+                  <Wallet className={`w-6 h-6 ${stats.saldo_total >= 0 ? 'text-success-700' : 'text-danger-700'}`} />
                 </div>
               </div>
             </div>
@@ -166,7 +166,7 @@ export default function AdminPage() {
             className="group block p-4 sm:p-6 bg-white rounded-xl shadow-sm hover:shadow-lg border border-neutral-100 hover:border-primary-200 transition-all hover-lift"
           >
             <div className="p-3 bg-primary-50 rounded-lg w-fit mb-4 group-hover:bg-primary-100 transition-colors">
-              <Users className="w-6 h-6 text-primary-600" />
+              <Users className="w-6 h-6 text-primary-700" />
             </div>
             <h3 className="font-bold text-neutral-900 mb-1">Usuários</h3>
             <p className="text-xs text-neutral-600 leading-relaxed">Criar, editar, ativar/desativar</p>
@@ -178,7 +178,7 @@ export default function AdminPage() {
             className="group block p-4 sm:p-6 bg-white rounded-xl shadow-sm hover:shadow-lg border border-neutral-100 hover:border-success-200 transition-all hover-lift"
           >
             <div className="p-3 bg-success-50 rounded-lg w-fit mb-4 group-hover:bg-success-100 transition-colors">
-              <Wallet className="w-6 h-6 text-success-600" />
+              <Wallet className="w-6 h-6 text-success-700" />
             </div>
             <h3 className="font-bold text-neutral-900 mb-1">Créditos</h3>
             <p className="text-xs text-neutral-600 leading-relaxed">Adicionar saldo para usuários</p>
@@ -190,7 +190,7 @@ export default function AdminPage() {
             className="group block p-4 sm:p-6 bg-white rounded-xl shadow-sm hover:shadow-lg border border-neutral-100 hover:border-secondary-200 transition-all hover-lift"
           >
             <div className="p-3 bg-secondary-50 rounded-lg w-fit mb-4 group-hover:bg-secondary-100 transition-colors">
-              <Mail className="w-6 h-6 text-secondary-600" />
+              <Mail className="w-6 h-6 text-secondary-700" />
             </div>
             <h3 className="font-bold text-neutral-900 mb-1">Notificações</h3>
             <p className="text-xs text-neutral-600 leading-relaxed">Configurar notificações por email</p>
@@ -202,7 +202,7 @@ export default function AdminPage() {
             className="group block p-4 sm:p-6 bg-white rounded-xl shadow-sm hover:shadow-lg border border-neutral-100 hover:border-warning-200 transition-all hover-lift"
           >
             <div className="p-3 bg-warning-50 rounded-lg w-fit mb-4 group-hover:bg-warning-100 transition-colors">
-              <BarChart3 className="w-6 h-6 text-warning-600" />
+              <BarChart3 className="w-6 h-6 text-warning-700" />
             </div>
             <h3 className="font-bold text-neutral-900 mb-1">Relatórios</h3>
             <p className="text-xs text-neutral-600 leading-relaxed">Visualizar e exportar dados</p>

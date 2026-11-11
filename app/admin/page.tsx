@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { LoadingSpinner, ErrorAlert } from '@/components';
 import { User } from '@/types';
-import { Users, TrendingUp, Wallet, Mail, BarChart3, ArrowLeft, LogOut } from 'lucide-react';
+import { Users, TrendingUp, Wallet, Mail, BarChart3, ArrowLeft, LogOut, Key } from 'lucide-react';
 
 interface FamilyStats {
   total_usuarios: number;
@@ -83,13 +83,22 @@ export default function AdminPage() {
             <h1 className="text-2xl font-black text-neutral-900">FinControl Admin</h1>
             <p className="text-sm text-neutral-600 mt-0.5">Painel de Administração</p>
           </div>
-          <button
-            onClick={handleLogout}
-            className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-danger-600 hover:bg-danger-50 rounded-lg transition-colors"
-          >
-            <LogOut size={18} />
-            Sair
-          </button>
+          <div className="flex gap-2">
+            <Link
+              href="/alterar-senha"
+              className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-primary-600 hover:bg-primary-50 rounded-lg transition-colors"
+            >
+              <Key size={18} />
+              Alterar Senha
+            </Link>
+            <button
+              onClick={handleLogout}
+              className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-danger-600 hover:bg-danger-50 rounded-lg transition-colors"
+            >
+              <LogOut size={18} />
+              Sair
+            </button>
+          </div>
         </div>
       </header>
 

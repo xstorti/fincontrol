@@ -9,6 +9,13 @@ interface CreatedUser extends User {
   temp_password?: string;
 }
 
+interface PasswordChangeState {
+  userId: string;
+  userName: string;
+  gerar_temporaria: boolean;
+  nova_senha: string;
+}
+
 export default function UsuariosPage() {
   const router = useRouter();
   const [users, setUsers] = useState<User[]>([]);
@@ -18,6 +25,9 @@ export default function UsuariosPage() {
   const [formData, setFormData] = useState({ nome: '', email: '', tipo_usuario: 'user' as const });
   const [submitting, setSubmitting] = useState(false);
   const [newUser, setNewUser] = useState<CreatedUser | null>(null);
+  const [editingPassword, setEditingPassword] = useState<PasswordChangeState | null>(null);
+  const [passwordSubmitting, setPasswordSubmitting] = useState(false);
+  const [passwordResult, setPasswordResult] = useState<{ user_id: string; temp_password?: string } | null>(null);
 
   useEffect(() => {
     fetchUsers();
@@ -108,6 +118,39 @@ export default function UsuariosPage() {
     }
   };
 
+  const handleChangePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingPassword) return;
+
+    setPasswordSubmitting(true);
+    setError('');
+
+    try {
+      const res = await fetch(`/api/admin/usuarios/${editingPassword.userId}/password`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          gerar_temporaria: editingPassword.gerar_temporaria,
+          nova_senha: editingPassword.gerar_temporaria ? undefined : editingPassword.nova_senha,
+        }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        setError(data.error || 'Erro ao alterar senha');
+        return;
+      }
+
+      const data = await res.json();
+      setPasswordResult({ user_id: editingPassword.userId, temp_password: data.data.temp_password });
+      setEditingPassword(null);
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setPasswordSubmitting(false);
+    }
+  };
+
   return (
     <div className="flex flex-col min-h-screen bg-neutral-50 dark:bg-neutral-900">
       {/* Header */}
@@ -175,7 +218,101 @@ export default function UsuariosPage() {
           </div>
         )}
 
-        {/* Add Button */}
+        {/* Change Password Modal */}
+        {editingPassword && (
+          <form onSubmit={handleChangePassword} className="p-4 bg-primary-50 dark:bg-primary-900/20 border border-primary-200 dark:border-primary-700/50 rounded-lg space-y-4">
+            <p className="font-bold text-primary-700 dark:text-primary-600">🔐 Alterar Senha - {editingPassword.userName}</p>
+            
+            <div className="space-y-4">
+              <div className="flex items-center gap-3">
+                <input
+                  type="checkbox"
+                  id="gerar_temporaria"
+                  checked={editingPassword.gerar_temporaria}
+                  onChange={(e) =>
+                    setEditingPassword({
+                      ...editingPassword,
+                      gerar_temporaria: e.target.checked,
+                      nova_senha: '',
+                    })
+                  }
+                  className="w-4 h-4 rounded cursor-pointer"
+                />
+                <label htmlFor="gerar_temporaria" className="text-sm font-medium text-neutral-900 dark:text-neutral-100 cursor-pointer">
+                  Gerar senha temporária aleatória
+                </label>
+              </div>
+
+              {!editingPassword.gerar_temporaria && (
+                <div>
+                  <label className="block text-sm font-medium text-neutral-900 dark:text-neutral-100 mb-2">Nova Senha</label>
+                  <input
+                    type="password"
+                    value={editingPassword.nova_senha}
+                    onChange={(e) => setEditingPassword({ ...editingPassword, nova_senha: e.target.value })}
+                    minLength={6}
+                    required={!editingPassword.gerar_temporaria}
+                    placeholder="Mínimo 6 caracteres"
+                    className="w-full px-4 py-2 border border-neutral-300 dark:border-neutral-600 bg-white dark:bg-neutral-700 text-neutral-900 dark:text-neutral-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  />
+                </div>
+              )}
+
+              <div className="flex gap-2">
+                <button
+                  type="submit"
+                  disabled={passwordSubmitting}
+                  className="flex-1 py-2 bg-primary-600 hover:bg-primary-700 disabled:bg-neutral-400 text-white font-semibold rounded-lg transition-colors disabled:cursor-not-allowed"
+                >
+                  {passwordSubmitting ? 'Alterando...' : 'Alterar Senha'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setEditingPassword(null)}
+                  className="flex-1 py-2 bg-neutral-300 dark:bg-neutral-700 hover:bg-neutral-400 dark:hover:bg-neutral-600 text-neutral-900 dark:text-neutral-100 font-semibold rounded-lg transition-colors"
+                >
+                  Cancelar
+                </button>
+              </div>
+            </div>
+          </form>
+        )}
+
+        {/* Password Changed Success */}
+        {passwordResult && (
+          <div className="p-4 bg-success-50 dark:bg-success-900/20 border border-success-200 dark:border-success-700/50 rounded-lg">
+            <p className="font-bold text-success-700 dark:text-success-600 mb-3">✅ Senha alterada com sucesso!</p>
+            {passwordResult.temp_password && (
+              <div className="space-y-3 bg-white dark:bg-neutral-800 p-3 rounded mb-3">
+                <p className="text-xs font-semibold text-neutral-600 dark:text-neutral-400">Senha Temporária Gerada:</p>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={passwordResult.temp_password}
+                    readOnly
+                    className="flex-1 px-3 py-2 bg-neutral-100 dark:bg-neutral-700 border border-neutral-300 dark:border-neutral-600 rounded text-sm font-mono text-neutral-900 dark:text-neutral-100"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      navigator.clipboard.writeText(passwordResult.temp_password || '');
+                    }}
+                    className="px-3 py-2 bg-primary-600 hover:bg-primary-700 dark:bg-primary-500 dark:hover:bg-primary-600 text-white text-xs font-semibold rounded transition-colors"
+                  >
+                    Copiar
+                  </button>
+                </div>
+              </div>
+            )}
+            <button
+              type="button"
+              onClick={() => setPasswordResult(null)}
+              className="w-full py-2 bg-neutral-300 dark:bg-neutral-700 hover:bg-neutral-400 dark:hover:bg-neutral-600 text-neutral-900 dark:text-neutral-100 font-semibold rounded-lg transition-colors"
+            >
+              Fechar
+            </button>
+          </div>
+        )}
         <button
           onClick={() => setShowForm(!showForm)}
           className="w-full py-3 bg-neutral-700 hover:bg-neutral-800 text-white font-black rounded-lg transition-colors shadow-md hover:shadow-lg"
@@ -256,7 +393,13 @@ export default function UsuariosPage() {
                     Tipo: <span className="font-semibold">{u.tipo_usuario}</span>
                   </p>
                 </div>
-                <div className="flex gap-2">
+                <div className="flex gap-2 flex-wrap justify-end">
+                  <button
+                    onClick={() => setEditingPassword({ userId: u.id, userName: u.nome, gerar_temporaria: true, nova_senha: '' })}
+                    className="px-3 py-1 text-xs font-semibold rounded bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-400 hover:bg-primary-200 dark:hover:bg-primary-800/50 transition-colors"
+                  >
+                    🔐 Senha
+                  </button>
                   <button
                     onClick={() => handleToggleActive(u.id, u.ativo)}
                     className={`px-3 py-1 text-xs font-semibold rounded transition-colors ${

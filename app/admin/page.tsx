@@ -195,19 +195,18 @@ export default function AdminPage() {
                 <h3 className="text-lg sm:text-xl font-black text-neutral-900 mb-6">
                   📊 Despesas Acumuladas por Usuário
                 </h3>
-                <div className="w-full h-80">
+                <div className="w-full h-96">
                   <ResponsiveContainer width="100%" height="100%">
-                    <PieChart>
+                    <PieChart margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
                       <Pie
                         data={despesas.acumuladas.map((d) => ({
                           name: d.nome,
                           value: parseFloat(d.total.toFixed(2)),
                         }))}
                         cx="50%"
-                        cy="50%"
+                        cy="45%"
                         labelLine={false}
-                        label={({ name, value }) => `${name}: ${((value / despesas.acumuladas.reduce((sum, d) => sum + d.total, 0)) * 100).toFixed(0)}%`}
-                        outerRadius={120}
+                        outerRadius={75}
                         fill="#8884d8"
                         dataKey="value"
                       >
@@ -216,15 +215,33 @@ export default function AdminPage() {
                         ))}
                       </Pie>
                       <Tooltip
-                        formatter={(value: any) => `R$ ${typeof value === 'number' ? value.toFixed(2) : parseFloat(String(value || 0)).toFixed(2)}`}
+                        formatter={(value: any) => {
+                          const numValue = typeof value === 'number' ? value : parseFloat(String(value || 0));
+                          const totalAcumulado = despesas.acumuladas.reduce((sum, d) => sum + d.total, 0);
+                          const percentage = ((numValue / totalAcumulado) * 100).toFixed(1);
+                          return [`R$ ${numValue.toFixed(2)} (${percentage}%)`, 'Valor'];
+                        }}
                         contentStyle={{
                           backgroundColor: '#ffffff',
-                          border: '1px solid #e5e7eb',
+                          border: '2px solid #2563eb',
                           borderRadius: '8px',
                           color: '#000000',
+                          padding: '8px',
                         }}
                       />
-                      <Legend />
+                      <Legend
+                        verticalAlign="bottom"
+                        height={36}
+                        formatter={(value, entry: any) => {
+                          const dataItem = despesas.acumuladas.find((d) => d.nome === value);
+                          if (dataItem) {
+                            const totalAcumulado = despesas.acumuladas.reduce((sum, d) => sum + d.total, 0);
+                            const percentage = ((dataItem.total / totalAcumulado) * 100).toFixed(1);
+                            return `${value} - ${percentage}%`;
+                          }
+                          return value;
+                        }}
+                      />
                     </PieChart>
                   </ResponsiveContainer>
                 </div>
@@ -242,19 +259,18 @@ export default function AdminPage() {
                 <h3 className="text-lg sm:text-xl font-black text-neutral-900 mb-6">
                   📈 Despesas do Dia por Usuário
                 </h3>
-                <div className="w-full h-80">
+                <div className="w-full h-96">
                   <ResponsiveContainer width="100%" height="100%">
-                    <PieChart>
+                    <PieChart margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
                       <Pie
                         data={despesas.dia.map((d) => ({
                           name: d.nome,
                           value: parseFloat(d.total.toFixed(2)),
                         }))}
                         cx="50%"
-                        cy="50%"
+                        cy="45%"
                         labelLine={false}
-                        label={({ name, value }) => `${name}: ${((value / despesas.dia.reduce((sum, d) => sum + d.total, 0)) * 100).toFixed(0)}%`}
-                        outerRadius={120}
+                        outerRadius={75}
                         fill="#8884d8"
                         dataKey="value"
                       >
@@ -263,15 +279,33 @@ export default function AdminPage() {
                         ))}
                       </Pie>
                       <Tooltip
-                        formatter={(value: any) => `R$ ${typeof value === 'number' ? value.toFixed(2) : parseFloat(String(value || 0)).toFixed(2)}`}
+                        formatter={(value: any) => {
+                          const numValue = typeof value === 'number' ? value : parseFloat(String(value || 0));
+                          const totalDia = despesas.dia.reduce((sum, d) => sum + d.total, 0);
+                          const percentage = ((numValue / totalDia) * 100).toFixed(1);
+                          return [`R$ ${numValue.toFixed(2)} (${percentage}%)`, 'Valor'];
+                        }}
                         contentStyle={{
                           backgroundColor: '#ffffff',
-                          border: '1px solid #e5e7eb',
+                          border: '2px solid #dc2626',
                           borderRadius: '8px',
                           color: '#000000',
+                          padding: '8px',
                         }}
                       />
-                      <Legend />
+                      <Legend
+                        verticalAlign="bottom"
+                        height={36}
+                        formatter={(value, entry: any) => {
+                          const dataItem = despesas.dia.find((d) => d.nome === value);
+                          if (dataItem) {
+                            const totalDia = despesas.dia.reduce((sum, d) => sum + d.total, 0);
+                            const percentage = ((dataItem.total / totalDia) * 100).toFixed(1);
+                            return `${value} - ${percentage}%`;
+                          }
+                          return value;
+                        }}
+                      />
                     </PieChart>
                   </ResponsiveContainer>
                 </div>

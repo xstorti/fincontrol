@@ -77,11 +77,15 @@ export async function POST(req: NextRequest) {
     const tempPassword = generateTemporaryPassword();
     const senhaHash = await hashPassword(tempPassword);
 
+    // Generate UUID for new user
+    const newUserId = crypto.randomUUID();
+
     // Create new user in Supabase
     const { data: newUser, error: insertError } = await supabaseAdmin
       .from('users')
       .insert([
         {
+          id: newUserId,
           nome,
           email,
           senha_hash: senhaHash,

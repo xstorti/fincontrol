@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
-import jwt from 'jsonwebtoken';
+import { withAuth, createErrorResponse } from '@/lib/middleware';
 import bcrypt from 'bcryptjs';
 
 const supabase = createClient(
@@ -10,19 +10,11 @@ const supabase = createClient(
 
 export async function POST(request: NextRequest) {
   try {
-    // Verify JWT token
-    const token = request.headers.get('authorization')?.split(' ')[1];
-    if (!token) {
-      return NextResponse.json({ error: 'Não autenticado' }, { status: 401 });
-    }
+    // Verify JWT token from cookie
+    const { user, error } = await withAuth(request);
 
-    // Verify JWT
-    const secret = process.env.JWT_SECRET;
-    let decoded: any;
-    try {
-      decoded = jwt.verify(token, secret!) as any;
-    } catch {
-      return NextResponse.json({ error: 'Token inválido' }, { status: 401 });
+    if (!user || error) {
+      return createErrorResponse('Não autenticado', 401);
     }
 
     // Get request body
@@ -30,34 +22,34 @@ export async function POST(request: NextRequest) {
     const { senha_atual, nova_senha } = body;
 
     if (!senha_atual || !nova_senha) {
-      return NextResponse.json(
-        { error: 'Forneça senha_atual e nova_senha' },
-        { status: 400 }
+      return createErrorResponse(
+        'Forneça senha_atual e nova_senha',
+        400
       );
     }
 
     if (nova_senha.length < 6) {
-      return NextResponse.json(
-        { error: 'Nova senha deve ter pelo menos 6 caracteres' },
-        { status: 400 }
+      return createErrorResponse(
+        'Nova senha deve ter pelo menos 6 caracteres',
+        400
       );
     }
 
     // Get current user
-    const { data: user, error: userError } = await supabase
+    const { data: userData, error: userError } = await supabase
       .from('users')
       .select('*')
-      .eq('id', decoded.userId)
+      .eq('id', user.id)
       .single();
 
-    if (userError || !user) {
-      return NextResponse.json({ error: 'Usuário não encontrado' }, { status: 404 });
+    if (userError || !userData) {
+      return createErrorResponse('Usuário não encontrado', 404);
     }
 
     // Verify current password
-    const passwordMatch = await bcrypt.compare(senha_atual, user.senha_hash);
+    const passwordMatch = await bcrypt.compare(senha_atual, userData.senha_hash);
     if (!passwordMatch) {
-      return NextResponse.json({ error: 'Senha atual incorreta' }, { status: 401 });
+      return createErrorResponse('Senha atual incorreta', 401);
     }
 
     // Hash new password
@@ -70,11 +62,11 @@ export async function POST(request: NextRequest) {
         senha_hash: novasenhaHash,
         senha_temporaria: false, // Mark as non-temporary
       })
-      .eq('id', decoded.userId);
+      .eq('id', user.id);
 
     if (updateError) {
       console.error('Update error:', updateError);
-      return NextResponse.json({ error: 'Erro ao atualizar senha' }, { status: 500 });
+      return createErrorResponse('Erro ao atualizar senha', 500);
     }
 
     return NextResponse.json({
@@ -82,6 +74,6 @@ export async function POST(request: NextRequest) {
     });
   } catch (error: any) {
     console.error('Error:', error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return createErrorResponse(error.message || 'Erro ao alterar senha', 500);
   }
 }

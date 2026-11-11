@@ -45,10 +45,10 @@ export default function AlterarSenhaPage() {
     setLoading(true);
 
     try {
-      // Get token from localStorage or cookie
       const res = await fetch('/api/auth/change-password', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include', // Send cookies automatically
         body: JSON.stringify({
           senha_atual: formData.senha_atual,
           nova_senha: formData.nova_senha,

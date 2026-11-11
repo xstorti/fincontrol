@@ -129,6 +129,7 @@ export default function UsuariosPage() {
       const res = await fetch(`/api/admin/usuarios/${editingPassword.userId}/password`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include', // Send cookies automatically
         body: JSON.stringify({
           gerar_temporaria: editingPassword.gerar_temporaria,
           nova_senha: editingPassword.gerar_temporaria ? undefined : editingPassword.nova_senha,

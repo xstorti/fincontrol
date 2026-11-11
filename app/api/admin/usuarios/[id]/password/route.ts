@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
-import jwt from 'jsonwebtoken';
+import { withAdminAuth, createErrorResponse } from '@/lib/middleware';
 import bcrypt from 'bcryptjs';
 
 const supabase = createClient(
@@ -15,30 +15,11 @@ export async function POST(
   try {
     const { id } = await params;
     
-    // Verify JWT token
-    const token = request.headers.get('authorization')?.split(' ')[1];
-    if (!token) {
-      return NextResponse.json({ error: 'Não autenticado' }, { status: 401 });
-    }
+    // Verify admin access
+    const { user: adminUser, error } = await withAdminAuth(request);
 
-    // Verify JWT
-    const secret = process.env.JWT_SECRET;
-    let decoded: any;
-    try {
-      decoded = jwt.verify(token, secret!) as any;
-    } catch {
-      return NextResponse.json({ error: 'Token inválido' }, { status: 401 });
-    }
-
-    // Get current admin user
-    const { data: adminUser, error: adminError } = await supabase
-      .from('users')
-      .select('*')
-      .eq('id', decoded.userId)
-      .single();
-
-    if (adminError || !adminUser || adminUser.tipo_usuario !== 'admin') {
-      return NextResponse.json({ error: 'Apenas admin pode alterar senhas' }, { status: 403 });
+    if (!adminUser || error) {
+      return createErrorResponse('Apenas admin pode alterar senhas', 403);
     }
 
     // Get request body
@@ -46,7 +27,7 @@ export async function POST(
     const { nova_senha, gerar_temporaria } = body;
 
     if (!nova_senha && !gerar_temporaria) {
-      return NextResponse.json({ error: 'Forneça nova_senha ou gerar_temporaria' }, { status: 400 });
+      return createErrorResponse('Forneça nova_senha ou gerar_temporaria', 400);
     }
 
     // Hash new password
@@ -70,7 +51,7 @@ export async function POST(
 
     if (updateError) {
       console.error('Update error:', updateError);
-      return NextResponse.json({ error: 'Erro ao atualizar senha' }, { status: 500 });
+      return createErrorResponse('Erro ao atualizar senha', 500);
     }
 
     return NextResponse.json({
@@ -83,6 +64,6 @@ export async function POST(
     });
   } catch (error: any) {
     console.error('Error:', error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return createErrorResponse(error.message || 'Erro ao alterar senha', 500);
   }
 }

@@ -45,9 +45,28 @@ export async function POST(request: NextRequest) {
     const rpId = process.env.NEXT_PUBLIC_RP_ID || 'fincontrol-three-indol.vercel.app';
     const rpOrigin = process.env.NEXT_PUBLIC_RP_ORIGIN || 'https://fincontrol-three-indol.vercel.app';
 
+    // Supabase retorna BYTEA como string base64 via PostgREST
+    console.log('[WebAuthn Auth Verify] public_key tipo:', typeof dbCredential.public_key);
+    console.log('[WebAuthn Auth Verify] public_key amostra:', String(dbCredential.public_key).substring(0, 40));
+
+    // Copiar para ArrayBuffer proprio (Buffer Node.js usa pool SharedArrayBuffer)
+    function toUint8Array(data: any): Uint8Array<ArrayBuffer> {
+      let bytes: Uint8Array;
+      if (typeof data === 'string') {
+        bytes = new Uint8Array(Buffer.from(data, 'base64'));
+      } else {
+        bytes = new Uint8Array(data);
+      }
+      const ab = new ArrayBuffer(bytes.byteLength);
+      new Uint8Array(ab).set(bytes);
+      return new Uint8Array(ab);
+    }
+
+    const publicKeyBuffer = toUint8Array(dbCredential.public_key);
+    console.log('[WebAuthn Auth Verify] publicKey byteLength:', publicKeyBuffer.byteLength);
+
     let verification;
     try {
-      // No v14: credential.id deve ser Base64URLString, publicKey como Uint8Array
       verification = await verifyAuthenticationResponse({
         response: credential,
         expectedChallenge: challenge,
@@ -55,7 +74,7 @@ export async function POST(request: NextRequest) {
         expectedRPID: rpId,
         credential: {
           id: dbCredential.credential_id,
-          publicKey: new Uint8Array(Buffer.from(dbCredential.public_key)),
+          publicKey: publicKeyBuffer,
           counter: dbCredential.sign_count,
           transports: dbCredential.transports || ['internal'],
         },

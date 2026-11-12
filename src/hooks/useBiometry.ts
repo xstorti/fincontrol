@@ -33,10 +33,19 @@ function getDeviceName(): string {
 }
 
 /**
- * Converter base64 string para ArrayBuffer
- * SimpleWebAuthn precisa de ArrayBuffer para challenge
+ * Converter base64url string para ArrayBuffer
+ * SimpleWebAuthn usa base64url encoding para challenge e IDs
+ * Base64url: - em vez de +, _ em vez de /, sem padding =
  */
-function base64ToArrayBuffer(base64: string): ArrayBuffer {
+function base64urlToArrayBuffer(base64url: string): ArrayBuffer {
+  // Converter base64url para base64 padrão
+  let base64 = base64url.replace(/-/g, '+').replace(/_/g, '/');
+  // Adicionar padding se necessário
+  const padding = 4 - (base64.length % 4);
+  if (padding !== 4) {
+    base64 += '='.repeat(padding);
+  }
+  
   // Converter base64 para string binária
   const binaryString = atob(base64);
   // Converter para Uint8Array
@@ -102,14 +111,27 @@ export function useBiometry(): UseBiometryReturn {
       console.log('[useBiometry] Challenge tipo:', typeof data.options.challenge, 'tamanho:', data.options.challenge?.length);
       console.log('[useBiometry] Challenge primeiros 20 chars:', String(data.options.challenge).substring(0, 20));
 
-      // Converter challenge de base64 para ArrayBuffer
-      const challengeArrayBuffer = base64ToArrayBuffer(data.options.challenge);
-      console.log('[useBiometry] Challenge convertido para ArrayBuffer, tamanho:', challengeArrayBuffer.byteLength);
+      // Converter challenge de base64url para ArrayBuffer
+      let challengeArrayBuffer;
+      try {
+        challengeArrayBuffer = base64urlToArrayBuffer(data.options.challenge);
+        console.log('[useBiometry] Challenge convertido para ArrayBuffer, tamanho:', challengeArrayBuffer.byteLength);
+      } catch (e) {
+        console.error('[useBiometry] Erro ao converter challenge:', e);
+        throw new Error('Challenge em formato inválido');
+      }
 
-      // Criar opções com challenge correto
+      // Converter allowCredentials id's de base64url para ArrayBuffer também
+      const convertedAllowCredentials = (data.options.allowCredentials || []).map((cred: any) => ({
+        ...cred,
+        id: typeof cred.id === 'string' ? base64urlToArrayBuffer(cred.id) : cred.id,
+      }));
+
+      // Criar opções com challenge e credenciais corretos
       const optionsWithArrayBuffer = {
         ...data.options,
         challenge: challengeArrayBuffer,
+        allowCredentials: convertedAllowCredentials,
       };
 
       // 2. Iniciar fluxo de registro WebAuthn
@@ -203,14 +225,14 @@ export function useBiometry(): UseBiometryReturn {
         throw new Error('Resposta inválida da API: falta options');
       }
 
-      // Converter challenge de base64 para ArrayBuffer
-      const challengeArrayBuffer = base64ToArrayBuffer(data.options.challenge);
+      // Converter challenge de base64url para ArrayBuffer
+      const challengeArrayBuffer = base64urlToArrayBuffer(data.options.challenge);
       console.log('[useBiometry] Challenge convertido para ArrayBuffer, tamanho:', challengeArrayBuffer.byteLength);
 
-      // Converter allowCredentials id's de base64 para ArrayBuffer também
+      // Converter allowCredentials id's de base64url para ArrayBuffer também
       const convertedAllowCredentials = (data.options.allowCredentials || []).map((cred: any) => ({
         ...cred,
-        id: typeof cred.id === 'string' ? base64ToArrayBuffer(cred.id) : cred.id,
+        id: typeof cred.id === 'string' ? base64urlToArrayBuffer(cred.id) : cred.id,
       }));
 
       // Criar opções com challenge e credenciais corretos

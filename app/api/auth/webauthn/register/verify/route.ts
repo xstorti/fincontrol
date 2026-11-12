@@ -76,7 +76,11 @@ export async function POST(request: NextRequest) {
         credentialIdStr = '';
       }
       
-      console.log('[WebAuthn Register Verify] Credential ID salvo (tipo: ' + typeof credentialId + ', tamanho: ' + (credentialId?.length || 0) + ')');
+      console.log('[WebAuthn Register Verify] Credential ID será salvo no banco');
+      console.log('[WebAuthn Register Verify] - Tipo original:', typeof credentialId);
+      console.log('[WebAuthn Register Verify] - Tamanho original:', credentialId?.length);
+      console.log('[WebAuthn Register Verify] - String final:', credentialIdStr);
+      console.log('[WebAuthn Register Verify] - String length:', credentialIdStr.length);
 
       const { data, error } = await supabaseAdmin
         .from('webauthn_credentials')
@@ -90,8 +94,11 @@ export async function POST(request: NextRequest) {
         });
 
       if (error) {
+        console.log('[WebAuthn Register Verify] Erro ao salvar no banco:', error.message);
         throw error;
       }
+
+      console.log('[WebAuthn Register Verify] Credencial salvo com sucesso no banco');
 
       // Limpar challenge do cookie
       cookieStore.delete('webauthn_challenge');

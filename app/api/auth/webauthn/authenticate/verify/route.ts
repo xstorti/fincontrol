@@ -52,8 +52,11 @@ export async function POST(request: NextRequest) {
         credentialIdStr = String(credentialId);
       }
       
-      console.log('[WebAuthn Authenticate Verify] Procurando credential (tipo: ' + typeof credentialId + ')');
-
+      console.log('[WebAuthn Authenticate Verify] Convertendo credential.id para string');
+      console.log('[WebAuthn Authenticate Verify] - Tipo original:', typeof credentialId);
+      console.log('[WebAuthn Authenticate Verify] - String resultado:', credentialIdStr);
+      console.log('[WebAuthn Authenticate Verify] - String length:', credentialIdStr.length);
+      
       // Buscar credencial no banco de dados
       console.log('[WebAuthn Authenticate Verify] Procurando credential_id:', credentialIdStr, 'para usuario_id:', userId);
       

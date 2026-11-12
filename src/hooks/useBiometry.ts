@@ -33,6 +33,21 @@ function getDeviceName(): string {
 }
 
 /**
+ * Converter base64 string para ArrayBuffer
+ * SimpleWebAuthn precisa de ArrayBuffer para challenge
+ */
+function base64ToArrayBuffer(base64: string): ArrayBuffer {
+  // Converter base64 para string binária
+  const binaryString = atob(base64);
+  // Converter para Uint8Array
+  const bytes = new Uint8Array(binaryString.length);
+  for (let i = 0; i < binaryString.length; i++) {
+    bytes[i] = binaryString.charCodeAt(i);
+  }
+  return bytes.buffer;
+}
+
+/**
  * Hook para gerenciar autenticação biométrica WebAuthn
  */
 export function useBiometry(): UseBiometryReturn {
@@ -87,13 +102,23 @@ export function useBiometry(): UseBiometryReturn {
       console.log('[useBiometry] Challenge tipo:', typeof data.options.challenge, 'tamanho:', data.options.challenge?.length);
       console.log('[useBiometry] Challenge primeiros 20 chars:', String(data.options.challenge).substring(0, 20));
 
+      // Converter challenge de base64 para ArrayBuffer
+      const challengeArrayBuffer = base64ToArrayBuffer(data.options.challenge);
+      console.log('[useBiometry] Challenge convertido para ArrayBuffer, tamanho:', challengeArrayBuffer.byteLength);
+
+      // Criar opções com challenge correto
+      const optionsWithArrayBuffer = {
+        ...data.options,
+        challenge: challengeArrayBuffer,
+      };
+
       // 2. Iniciar fluxo de registro WebAuthn
       console.log('[useBiometry] Opções obtidas, iniciando registro WebAuthn');
 
       // 2. Iniciar fluxo de registro WebAuthn
       let attestationResponse;
       try {
-        attestationResponse = await startRegistration(data.options);
+        attestationResponse = await startRegistration(optionsWithArrayBuffer);
         console.log('[useBiometry] Registro bem-sucedido, enviando para servidor');
         console.log('[useBiometry] Credential ID tipo:', typeof attestationResponse.id, 'tamanho:', attestationResponse.id?.length);
         console.log('[useBiometry] Credential ID valor:', attestationResponse.id);
@@ -178,12 +203,30 @@ export function useBiometry(): UseBiometryReturn {
         throw new Error('Resposta inválida da API: falta options');
       }
 
+      // Converter challenge de base64 para ArrayBuffer
+      const challengeArrayBuffer = base64ToArrayBuffer(data.options.challenge);
+      console.log('[useBiometry] Challenge convertido para ArrayBuffer, tamanho:', challengeArrayBuffer.byteLength);
+
+      // Converter allowCredentials id's de base64 para ArrayBuffer também
+      const convertedAllowCredentials = (data.options.allowCredentials || []).map((cred: any) => ({
+        ...cred,
+        id: typeof cred.id === 'string' ? base64ToArrayBuffer(cred.id) : cred.id,
+      }));
+
+      // Criar opções com challenge e credenciais corretos
+      const optionsWithArrayBuffer = {
+        ...data.options,
+        challenge: challengeArrayBuffer,
+        allowCredentials: convertedAllowCredentials,
+      };
+
       // 2. Iniciar fluxo de autenticação WebAuthn
       console.log('[useBiometry] Iniciando autenticação WebAuthn');
-      console.log('[useBiometry] Options challenge tipo:', typeof data.options.challenge);
+      console.log('[useBiometry] Options challenge tipo:', typeof optionsWithArrayBuffer.challenge);
+      console.log('[useBiometry] AllowCredentials convertidos:', convertedAllowCredentials.length);
       let assertionResponse;
       try {
-        assertionResponse = await startAuthentication(data.options);
+        assertionResponse = await startAuthentication(optionsWithArrayBuffer);
         console.log('[useBiometry] Autenticação bem-sucedida, enviando para servidor');
         console.log('[useBiometry] Credential ID tipo:', typeof assertionResponse.id, 'tamanho:', assertionResponse.id?.length);
         console.log('[useBiometry] Credential ID valor:', assertionResponse.id);

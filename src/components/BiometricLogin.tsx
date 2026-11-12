@@ -35,11 +35,11 @@ export function BiometricLogin({ email, onSuccess, onError }: BiometricLoginProp
     if (error && showRegistrationModal) {
       // Erro já é exibido no modal
       setDebugError(error);
-    } else if (error) {
+    } else if (error && !showBiometric) {
       onError(error);
       setDebugError(error);
     }
-  }, [error, showRegistrationModal, onError]);
+  }, [error, showRegistrationModal, onError, showBiometric]);
 
   const handleBiometricLogin = async () => {
     if (!email) {
@@ -56,14 +56,10 @@ export function BiometricLogin({ email, onSuccess, onError }: BiometricLoginProp
       // Login bem-sucedido
       console.log('[BiometricLogin] Login bem-sucedido');
       onSuccess(user);
-    } else if (!user && error?.includes('Nenhuma biometria')) {
-      // Nenhuma biometria registrada - abrir modal
+    } else if (!user) {
+      // Sem biometria registrada - abrir modal automaticamente
       console.log('[BiometricLogin] Nenhuma biometria, abrindo modal de registro');
       setShowRegistrationModal(true);
-    } else {
-      // Outro erro
-      console.log('[BiometricLogin] Erro não tratado:', error);
-      setDebugError(error || 'Erro desconhecido ao fazer login com biometria');
     }
   };
 
@@ -170,10 +166,7 @@ export function BiometricLogin({ email, onSuccess, onError }: BiometricLoginProp
             {(error || debugError) && (
               <div className="p-3 bg-red-500/10 border border-red-500/30 rounded-lg flex gap-2 items-start">
                 <AlertCircle size={16} className="text-red-400 flex-shrink-0 mt-0.5" strokeWidth={2.5} />
-                <div className="text-xs text-red-300">
-                  <p>{error || debugError}</p>
-                  <p className="text-red-400/60 mt-1">Debug: Verifique o console do navegador (F12)</p>
-                </div>
+                <p className="text-xs text-red-300">{error || debugError}</p>
               </div>
             )}
 

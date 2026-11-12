@@ -74,11 +74,24 @@ export function useBiometry(): UseBiometryReturn {
         throw new Error('Erro ao gerar opções de registro');
       }
 
-      const { data } = await optionsRes.json();
-      console.log('[useBiometry] Opções geradas, iniciando registro WebAuthn');
+      const responseData = await optionsRes.json();
+      console.log('[useBiometry] Resposta da API:', responseData);
+      
+      const { data } = responseData;
+      if (!data || !data.options) {
+        throw new Error('Resposta inválida da API: falta options');
+      }
+
+      console.log('[useBiometry] Opções obtidas, iniciando registro WebAuthn');
 
       // 2. Iniciar fluxo de registro WebAuthn
-      const attestationResponse = await startRegistration(data.options);
+      let attestationResponse;
+      try {
+        attestationResponse = await startRegistration(data.options);
+      } catch (regError: any) {
+        console.error('[useBiometry] Erro ao chamar startRegistration:', regError);
+        throw new Error(`Erro ao registrar biometria: ${regError.message}`);
+      }
 
       // 3. Verificar resposta no servidor
       const verifyRes = await fetch('/api/auth/webauthn/register/verify', {
@@ -139,7 +152,7 @@ export function useBiometry(): UseBiometryReturn {
         
         // Se não tiver biometria registrada, retorna null para que o componente abra o modal de registro
         if (errorMsg.includes('Nenhuma biometria') || optionsRes.status === 404) {
-          console.log('[useBiometry] Nenhuma biometria registrada - abrindo modal');
+          console.log('[useBiometry] Nenhuma biometria registrada - retornando null');
           setError('Nenhuma biometria registrada para este usuário');
           setIsLoading(false);
           return null;
@@ -147,11 +160,23 @@ export function useBiometry(): UseBiometryReturn {
         throw new Error(errorMsg);
       }
 
-      const { data } = await optionsRes.json();
+      const responseData = await optionsRes.json();
+      console.log('[useBiometry] Resposta de opções recebida');
+      
+      const { data } = responseData;
+      if (!data || !data.options) {
+        throw new Error('Resposta inválida da API: falta options');
+      }
 
       // 2. Iniciar fluxo de autenticação WebAuthn
       console.log('[useBiometry] Iniciando autenticação WebAuthn');
-      const assertionResponse = await startAuthentication(data.options);
+      let assertionResponse;
+      try {
+        assertionResponse = await startAuthentication(data.options);
+      } catch (authError: any) {
+        console.error('[useBiometry] Erro ao chamar startAuthentication:', authError);
+        throw new Error(`Erro ao autenticar: ${authError.message}`);
+      }
 
       // 3. Verificar resposta no servidor (faz login)
       const verifyRes = await fetch('/api/auth/webauthn/authenticate/verify', {

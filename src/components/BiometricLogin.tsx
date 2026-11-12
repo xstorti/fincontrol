@@ -16,7 +16,8 @@ interface BiometricLoginProps {
 function isMobileDevice(): boolean {
   if (typeof window === 'undefined') return false;
   const ua = navigator.userAgent.toLowerCase();
-  return /iphone|ipad|android|mobile/.test(ua) && !/windows|mac|linux/.test(ua);
+  // Verificar especificamente por iOS e Android (Android é baseado em Linux)
+  return /iphone|ipad|android/.test(ua);
 }
 
 /**

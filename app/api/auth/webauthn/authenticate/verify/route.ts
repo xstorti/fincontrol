@@ -4,200 +4,120 @@ import { supabaseAdmin } from '@/lib/supabase';
 import { cookies } from 'next/headers';
 import jwt from 'jsonwebtoken';
 
-/**
- * Verifica resposta de autenticação WebAuthn e faz login
- * POST /api/auth/webauthn/authenticate/verify
- */
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const { userId, credential } = body;
 
-    console.log('[WebAuthn Authenticate Verify] Recebido:', { userId, hasCredential: !!credential });
-
     if (!userId || !credential) {
-      console.log('[WebAuthn Authenticate Verify] Dados inválidos');
-      return NextResponse.json(
-        { error: 'Dados de autenticação inválidos' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Dados invalidos' }, { status: 400 });
     }
 
-    // Recuperar challenge do cookie
     const cookieStore = await cookies();
     const challenge = cookieStore.get('webauthn_challenge')?.value;
 
-    console.log('[WebAuthn Authenticate Verify] Challenge recuperado:', !!challenge);
-
     if (!challenge) {
-      console.log('[WebAuthn Authenticate Verify] Challenge expirado ou não encontrado');
-      return NextResponse.json(
-        { error: 'Challenge expirado. Tente novamente' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Challenge expirado. Tente novamente' }, { status: 400 });
     }
 
-    try {
-      // Converter credential.id para string de forma consistente
-      const credentialId = credential.id;
-      let credentialIdStr: string;
-      
-      if (typeof credentialId === 'string') {
-        credentialIdStr = credentialId;
-      } else if (credentialId instanceof Uint8Array || credentialId instanceof ArrayBuffer) {
-        // Converter para base64
-        const bytes = credentialId instanceof Uint8Array ? credentialId : new Uint8Array(credentialId);
-        credentialIdStr = Buffer.from(bytes).toString('base64');
-      } else {
-        credentialIdStr = String(credentialId);
-      }
-      
-      console.log('[WebAuthn Authenticate Verify] Convertendo credential.id para string');
-      console.log('[WebAuthn Authenticate Verify] - Tipo original:', typeof credentialId);
-      console.log('[WebAuthn Authenticate Verify] - String resultado:', credentialIdStr);
-      console.log('[WebAuthn Authenticate Verify] - String length:', credentialIdStr.length);
-      
-      // Buscar credencial no banco de dados
-      console.log('[WebAuthn Authenticate Verify] Procurando credential_id:', credentialIdStr, 'para usuario_id:', userId);
-      
-      const { data: dbCredential, error: credError } = await supabaseAdmin
+    // credential.id vem do browser como Base64URLString
+    const credentialId: string = credential.id;
+    console.log('[WebAuthn Auth Verify] credential.id:', credentialId, 'length:', credentialId?.length);
+
+    const { data: dbCredential, error: credError } = await supabaseAdmin
+      .from('webauthn_credentials')
+      .select('*')
+      .eq('usuario_id', parseInt(userId as any))
+      .eq('credential_id', credentialId)
+      .single();
+
+    if (credError || !dbCredential) {
+      // Debug: mostrar todas as credenciais do usuario
+      const { data: allCreds } = await supabaseAdmin
         .from('webauthn_credentials')
-        .select('*')
-        .eq('usuario_id', parseInt(userId as any))
-        .eq('credential_id', credentialIdStr)
-        .single();
+        .select('credential_id')
+        .eq('usuario_id', parseInt(userId as any));
+      console.log('[WebAuthn Auth Verify] Credenciais do usuario:', allCreds?.map((c: any) => c.credential_id));
+      console.log('[WebAuthn Auth Verify] Buscando por:', credentialId);
+      return NextResponse.json({ error: 'Credencial nao encontrada' }, { status: 404 });
+    }
 
-      console.log('[WebAuthn Authenticate Verify] Resultado da busca:', { encontrado: !!dbCredential, erro: credError?.message });
+    const rpId = process.env.NEXT_PUBLIC_RP_ID || 'fincontrol-three-indol.vercel.app';
+    const rpOrigin = process.env.NEXT_PUBLIC_RP_ORIGIN || 'https://fincontrol-three-indol.vercel.app';
 
-      if (credError || !dbCredential) {
-        console.log('[WebAuthn Authenticate Verify] Credencial não encontrada para ID:', credentialIdStr);
-        // Mostrar todas as credenciais do usuário para debug
-        const { data: allCreds } = await supabaseAdmin
-          .from('webauthn_credentials')
-          .select('credential_id')
-          .eq('usuario_id', parseInt(userId as any));
-        console.log('[WebAuthn Authenticate Verify] Credenciais armazenadas para este usuário:', allCreds?.map(c => `${c.credential_id.substring(0, 20)}... (len: ${c.credential_id.length})`));
-        return NextResponse.json(
-          { error: 'Credencial não encontrada' },
-          { status: 404 }
-        );
-      }
-
-      // Verificar resposta de autenticação
-      console.log('[WebAuthn Authenticate Verify] Verificando resposta de autenticação');
-      const rpId = process.env.NEXT_PUBLIC_RP_ID || 'fincontrol-three-indol.vercel.app';
-      const rpOrigin = process.env.NEXT_PUBLIC_RP_ORIGIN || 'https://fincontrol-three-indol.vercel.app';
-      
-      console.log('[WebAuthn Authenticate Verify] Usando RP_ID:', rpId, 'RP_ORIGIN:', rpOrigin);
-      
-      // Converter credential.id de base64 de volta para formato esperado
-      let credentialIdForVerification: any;
-      if (typeof dbCredential.credential_id === 'string' && dbCredential.credential_id.match(/^[A-Za-z0-9+/=]+$/)) {
-        // Se parece ser base64, converter para Buffer
-        credentialIdForVerification = Buffer.from(dbCredential.credential_id, 'base64');
-      } else {
-        credentialIdForVerification = dbCredential.credential_id;
-      }
-      
-      const verification = await verifyAuthenticationResponse({
+    let verification;
+    try {
+      // No v14: credential.id deve ser Base64URLString, publicKey como Uint8Array
+      verification = await verifyAuthenticationResponse({
         response: credential,
         expectedChallenge: challenge,
         expectedOrigin: rpOrigin,
         expectedRPID: rpId,
         credential: {
-          id: credentialIdForVerification,
-          publicKey: Buffer.from(dbCredential.public_key),
+          id: dbCredential.credential_id,
+          publicKey: new Uint8Array(Buffer.from(dbCredential.public_key)),
           counter: dbCredential.sign_count,
           transports: dbCredential.transports || ['internal'],
         },
       });
-
-      console.log('[WebAuthn Authenticate Verify] Verificação concluída:', verification.verified);
-
-      if (!verification.verified) {
-        console.log('[WebAuthn Authenticate Verify] Falha na verificação');
-        return NextResponse.json(
-          { error: 'Falha na verificação de autenticação' },
-          { status: 400 }
-        );
-      }
-
-      // Verificar e atualizar counter (proteção contra clonagem)
-      if (verification.authenticationInfo.newCounter <= dbCredential.sign_count) {
-        console.warn(`Possível ataque de clonagem detectado para usuário ${userId}`);
-        return NextResponse.json(
-          { error: 'Falha na segurança. Contate o suporte' },
-          { status: 403 }
-        );
-      }
-
-      // Atualizar último uso e counter
-      await supabaseAdmin
-        .from('webauthn_credentials')
-        .update({
-          last_used_at: new Date().toISOString(),
-          sign_count: verification.authenticationInfo.newCounter,
-          updated_at: new Date().toISOString(),
-        })
-        .eq('id', dbCredential.id);
-
-      // Buscar dados do usuário
-      const { data: user, error: userError } = await supabaseAdmin
-        .from('users')
-        .select('*')
-        .eq('id', userId)
-        .single();
-
-      if (userError || !user) {
-        return NextResponse.json(
-          { error: 'Usuário não encontrado' },
-          { status: 404 }
-        );
-      }
-
-      // Gerar JWT token
-      const token = jwt.sign(
-        { id: user.id, email: user.email, tipo_usuario: user.tipo_usuario },
-        process.env.JWT_SECRET || 'secret-key',
-        { expiresIn: '7d' }
-      );
-
-      // Salvar token em cookie
-      const newCookieStore = await cookies();
-      newCookieStore.set('auth_token', token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
-        maxAge: 7 * 24 * 60 * 60, // 7 dias
-      });
-
-      // Limpar challenge do cookie
-      newCookieStore.delete('webauthn_challenge');
-
-      return NextResponse.json(
-        {
-          data: {
-            id: user.id,
-            email: user.email,
-            nome: user.nome,
-            tipo_usuario: user.tipo_usuario,
-            senha_temporaria: user.senha_temporaria,
-          },
-        },
-        { status: 200 }
-      );
     } catch (verifyError: any) {
-      console.error('Erro ao verificar autenticação:', verifyError);
-      return NextResponse.json(
-        { error: verifyError.message || 'Falha na verificação de autenticação' },
-        { status: 400 }
-      );
+      console.error('[WebAuthn Auth Verify] Erro na verificacao:', verifyError.message);
+      cookieStore.delete('webauthn_challenge');
+      return NextResponse.json({ error: verifyError.message || 'Falha na verificacao' }, { status: 400 });
     }
-  } catch (error: any) {
-    console.error('Erro ao processar autenticação WebAuthn:', error);
-    return NextResponse.json(
-      { error: error.message || 'Erro ao processar autenticação' },
-      { status: 500 }
+
+    if (!verification.verified) {
+      return NextResponse.json({ error: 'Falha na verificacao de autenticacao' }, { status: 400 });
+    }
+
+    // Atualizar counter
+    await supabaseAdmin
+      .from('webauthn_credentials')
+      .update({
+        sign_count: verification.authenticationInfo.newCounter,
+        last_used_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', dbCredential.id);
+
+    const { data: user, error: userError } = await supabaseAdmin
+      .from('users')
+      .select('*')
+      .eq('id', userId)
+      .single();
+
+    if (userError || !user) {
+      return NextResponse.json({ error: 'Usuario nao encontrado' }, { status: 404 });
+    }
+
+    const token = jwt.sign(
+      { id: user.id, email: user.email, tipo_usuario: user.tipo_usuario },
+      process.env.JWT_SECRET || 'secret-key',
+      { expiresIn: '7d' }
     );
+
+    const newCookieStore = await cookies();
+    newCookieStore.set('auth_token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 7 * 24 * 60 * 60,
+    });
+    newCookieStore.delete('webauthn_challenge');
+
+    console.log('[WebAuthn Auth Verify] Login biometrico bem-sucedido para usuario:', user.id);
+
+    return NextResponse.json({
+      data: {
+        id: user.id,
+        email: user.email,
+        nome: user.nome,
+        tipo_usuario: user.tipo_usuario,
+        senha_temporaria: user.senha_temporaria,
+      },
+    }, { status: 200 });
+  } catch (error: any) {
+    console.error('[WebAuthn Auth Verify] Erro:', error);
+    return NextResponse.json({ error: error.message || 'Erro ao processar autenticacao' }, { status: 500 });
   }
 }

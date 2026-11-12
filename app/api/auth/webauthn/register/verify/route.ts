@@ -3,127 +3,74 @@ import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
 import { cookies } from 'next/headers';
 
-/**
- * Verifica resposta de registro WebAuthn e salva credencial
- * POST /api/auth/webauthn/register/verify
- */
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const { userId, credential, deviceName } = body;
 
-    console.log('[WebAuthn Register Verify] Recebido:', { userId, deviceName, hasCredential: !!credential });
-
     if (!userId || !credential) {
-      console.log('[WebAuthn Register Verify] Dados inválidos');
-      return NextResponse.json(
-        { error: 'Dados de credencial inválidos' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Dados invalidos' }, { status: 400 });
     }
 
-    // Recuperar challenge do cookie
     const cookieStore = await cookies();
     const challenge = cookieStore.get('webauthn_challenge')?.value;
 
-    console.log('[WebAuthn Register Verify] Challenge recuperado:', !!challenge);
-
     if (!challenge) {
-      console.log('[WebAuthn Register Verify] Challenge expirado ou não encontrado');
-      return NextResponse.json(
-        { error: 'Challenge expirado. Tente novamente' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Challenge expirado. Tente novamente' }, { status: 400 });
     }
 
+    const rpId = process.env.NEXT_PUBLIC_RP_ID || 'fincontrol-three-indol.vercel.app';
+    const rpOrigin = process.env.NEXT_PUBLIC_RP_ORIGIN || 'https://fincontrol-three-indol.vercel.app';
+
+    let verification;
     try {
-      // Verificar resposta de registro
-      const rpId = process.env.NEXT_PUBLIC_RP_ID || 'fincontrol-three-indol.vercel.app';
-      const rpOrigin = process.env.NEXT_PUBLIC_RP_ORIGIN || 'https://fincontrol-three-indol.vercel.app';
-      
-      console.log('[WebAuthn Register Verify] Usando RP_ID:', rpId, 'RP_ORIGIN:', rpOrigin);
-      
-      const verification = await verifyRegistrationResponse({
+      verification = await verifyRegistrationResponse({
         response: credential,
         expectedChallenge: challenge,
         expectedOrigin: rpOrigin,
         expectedRPID: rpId,
       });
-
-      if (!verification.verified) {
-        return NextResponse.json(
-          { error: 'Falha na verificação de registro' },
-          { status: 400 }
-        );
-      }
-
-      // Salvar credencial no banco de dados
-      const credentialId = verification.registrationInfo?.credential.id;
-      
-      // Converter credential.id para string se necessário
-      let credentialIdStr: string;
-      if (typeof credentialId === 'string') {
-        credentialIdStr = credentialId;
-      } else if (credentialId) {
-        // Converter buffer/arraybuffer para base64
-        try {
-          const bytes = new Uint8Array(credentialId as any);
-          credentialIdStr = Buffer.from(bytes).toString('base64');
-        } catch (e) {
-          credentialIdStr = String(credentialId);
-        }
-      } else {
-        credentialIdStr = '';
-      }
-      
-      console.log('[WebAuthn Register Verify] Credential ID será salvo no banco');
-      console.log('[WebAuthn Register Verify] - Tipo original:', typeof credentialId);
-      console.log('[WebAuthn Register Verify] - Tamanho original:', credentialId?.length);
-      console.log('[WebAuthn Register Verify] - String final:', credentialIdStr);
-      console.log('[WebAuthn Register Verify] - String length:', credentialIdStr.length);
-
-      const { data, error } = await supabaseAdmin
-        .from('webauthn_credentials')
-        .insert({
-          usuario_id: parseInt(userId as any),
-          credential_id: credentialIdStr,
-          public_key: Buffer.from(verification.registrationInfo?.credential.publicKey || []),
-          sign_count: 0,
-          transports: credential.response?.transports || [],
-          device_name: deviceName || 'Dispositivo',
-        });
-
-      if (error) {
-        console.log('[WebAuthn Register Verify] Erro ao salvar no banco:', error.message);
-        throw error;
-      }
-
-      console.log('[WebAuthn Register Verify] Credencial salvo com sucesso no banco');
-
-      // Limpar challenge do cookie
-      cookieStore.delete('webauthn_challenge');
-
-      return NextResponse.json(
-        {
-          data: {
-            success: true,
-            message: 'Biometria registrada com sucesso!',
-          },
-        },
-        { status: 200 }
-      );
     } catch (verifyError: any) {
-      console.error('Erro ao verificar registro:', verifyError);
-      return NextResponse.json(
-        { error: verifyError.message || 'Falha na verificação de registro' },
-        { status: 400 }
-      );
+      console.error('[WebAuthn Register Verify] Erro na verificacao:', verifyError.message);
+      cookieStore.delete('webauthn_challenge');
+      return NextResponse.json({ error: verifyError.message || 'Falha na verificacao' }, { status: 400 });
     }
-  } catch (error: any) {
-    console.error('Erro ao processar registro WebAuthn:', error);
+
+    if (!verification.verified || !verification.registrationInfo) {
+      return NextResponse.json({ error: 'Falha na verificacao de registro' }, { status: 400 });
+    }
+
+    // No v14, credential.id e uma Base64URLString
+    const credentialId = verification.registrationInfo.credential.id;
+    const credentialPublicKey = verification.registrationInfo.credential.publicKey;
+
+    console.log('[WebAuthn Register Verify] Credential ID:', credentialId, 'length:', credentialId.length);
+
+    const { error: insertError } = await supabaseAdmin
+      .from('webauthn_credentials')
+      .insert({
+        usuario_id: parseInt(userId as any),
+        credential_id: credentialId,
+        public_key: Buffer.from(credentialPublicKey),
+        sign_count: verification.registrationInfo.credential.counter || 0,
+        transports: credential.response?.transports || [],
+        device_name: deviceName || 'Dispositivo',
+      });
+
+    if (insertError) {
+      console.error('[WebAuthn Register Verify] Erro ao salvar:', insertError.message);
+      throw insertError;
+    }
+
+    cookieStore.delete('webauthn_challenge');
+    console.log('[WebAuthn Register Verify] Credencial salva com sucesso');
+
     return NextResponse.json(
-      { error: error.message || 'Erro ao processar registro' },
-      { status: 500 }
+      { data: { success: true, message: 'Biometria registrada com sucesso!' } },
+      { status: 200 }
     );
+  } catch (error: any) {
+    console.error('[WebAuthn Register Verify] Erro:', error);
+    return NextResponse.json({ error: error.message || 'Erro ao processar registro' }, { status: 500 });
   }
 }

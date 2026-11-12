@@ -1,7 +1,7 @@
 -- Criar tabela de credenciais WebAuthn para autenticação biométrica
 CREATE TABLE IF NOT EXISTS webauthn_credentials (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  usuario_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  usuario_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   credential_id TEXT NOT NULL UNIQUE,
   public_key BYTEA NOT NULL,
   sign_count INTEGER NOT NULL DEFAULT 0,
@@ -22,10 +22,10 @@ CREATE INDEX IF NOT EXISTS idx_webauthn_credential_id ON webauthn_credentials(cr
 ALTER TABLE webauthn_credentials ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "Usuários podem ver suas credenciais WebAuthn" ON webauthn_credentials
-  FOR SELECT USING (usuario_id = auth.uid()::uuid);
+  FOR SELECT USING (usuario_id = auth.uid()::bigint);
 
 CREATE POLICY "Sistema pode inserir credenciais WebAuthn" ON webauthn_credentials
   FOR INSERT WITH CHECK (true);
 
 CREATE POLICY "Usuários podem deletar suas credenciais" ON webauthn_credentials
-  FOR DELETE USING (usuario_id = auth.uid()::uuid);
+  FOR DELETE USING (usuario_id = auth.uid()::bigint);

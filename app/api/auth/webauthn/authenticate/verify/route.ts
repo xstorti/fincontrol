@@ -36,7 +36,7 @@ export async function POST(request: NextRequest) {
       const { data: dbCredential, error: credError } = await supabaseAdmin
         .from('webauthn_credentials')
         .select('*')
-        .eq('usuario_id', userId)
+        .eq('usuario_id', parseInt(userId as any))
         .eq('credential_id', credential.id)
         .single();
 

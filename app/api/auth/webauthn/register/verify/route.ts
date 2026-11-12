@@ -50,7 +50,7 @@ export async function POST(request: NextRequest) {
       const { data, error } = await supabaseAdmin
         .from('webauthn_credentials')
         .insert({
-          usuario_id: userId,
+          usuario_id: parseInt(userId as any),
           credential_id: verification.registrationInfo?.credential.id,
           public_key: Buffer.from(verification.registrationInfo?.credential.publicKey || []),
           sign_count: 0,

@@ -38,7 +38,7 @@ export async function POST(request: NextRequest) {
     const { data: credentials, error: credError } = await supabaseAdmin
       .from('webauthn_credentials')
       .select('credential_id, public_key, transports')
-      .eq('usuario_id', user.id);
+      .eq('usuario_id', parseInt(user.id as any));
 
     if (credError || !credentials || credentials.length === 0) {
       return NextResponse.json(

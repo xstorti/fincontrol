@@ -34,12 +34,16 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Converter id para Buffer (WebAuthn requer ArrayBuffer)
+    const userIdBuffer = Buffer.alloc(8);
+    userIdBuffer.writeBigInt64BE(BigInt(user.id));
+
     // Gerar opções de registro WebAuthn
     const options = generateRegistrationOptions({
       rpID: process.env.NEXT_PUBLIC_RP_ID || 'fincontrol-three-indol.vercel.app',
       rpName: 'FinControl',
       userName: email,
-      userID: user.id,
+      userID: userIdBuffer,
       userDisplayName: user.nome,
       authenticatorSelection: {
         authenticatorAttachment: 'platform', // Apenas biometria do dispositivo

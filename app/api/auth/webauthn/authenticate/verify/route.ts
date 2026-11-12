@@ -55,6 +55,8 @@ export async function POST(request: NextRequest) {
       console.log('[WebAuthn Authenticate Verify] Procurando credential (tipo: ' + typeof credentialId + ')');
 
       // Buscar credencial no banco de dados
+      console.log('[WebAuthn Authenticate Verify] Procurando credential_id:', credentialIdStr, 'para usuario_id:', userId);
+      
       const { data: dbCredential, error: credError } = await supabaseAdmin
         .from('webauthn_credentials')
         .select('*')
@@ -62,10 +64,16 @@ export async function POST(request: NextRequest) {
         .eq('credential_id', credentialIdStr)
         .single();
 
-      console.log('[WebAuthn Authenticate Verify] Credencial buscada:', !!dbCredential, credError?.message);
+      console.log('[WebAuthn Authenticate Verify] Resultado da busca:', { encontrado: !!dbCredential, erro: credError?.message });
 
       if (credError || !dbCredential) {
         console.log('[WebAuthn Authenticate Verify] Credencial não encontrada para ID:', credentialIdStr);
+        // Mostrar todas as credenciais do usuário para debug
+        const { data: allCreds } = await supabaseAdmin
+          .from('webauthn_credentials')
+          .select('credential_id')
+          .eq('usuario_id', parseInt(userId as any));
+        console.log('[WebAuthn Authenticate Verify] Credenciais armazenadas para este usuário:', allCreds?.map(c => `${c.credential_id.substring(0, 20)}... (len: ${c.credential_id.length})`));
         return NextResponse.json(
           { error: 'Credencial não encontrada' },
           { status: 404 }

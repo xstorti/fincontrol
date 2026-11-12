@@ -84,6 +84,8 @@ export function useBiometry(): UseBiometryReturn {
 
       console.log('[useBiometry] Estrutura de options:', Object.keys(data.options));
       console.log('[useBiometry] Challenge existe?', !!data.options.challenge);
+      console.log('[useBiometry] Challenge tipo:', typeof data.options.challenge, 'tamanho:', data.options.challenge?.length);
+      console.log('[useBiometry] Challenge primeiros 20 chars:', String(data.options.challenge).substring(0, 20));
 
       // 2. Iniciar fluxo de registro WebAuthn
       console.log('[useBiometry] Opções obtidas, iniciando registro WebAuthn');
@@ -94,6 +96,8 @@ export function useBiometry(): UseBiometryReturn {
         attestationResponse = await startRegistration(data.options);
         console.log('[useBiometry] Registro bem-sucedido, enviando para servidor');
         console.log('[useBiometry] Credential ID tipo:', typeof attestationResponse.id, 'tamanho:', attestationResponse.id?.length);
+        console.log('[useBiometry] Credential ID valor:', attestationResponse.id);
+        console.log('[useBiometry] Attestation response completo:', JSON.stringify(attestationResponse, null, 2).substring(0, 500));
       } catch (regError: any) {
         console.error('[useBiometry] Erro ao chamar startRegistration:', regError);
         throw new Error(`Erro ao registrar biometria: ${regError.message}`);
@@ -176,17 +180,21 @@ export function useBiometry(): UseBiometryReturn {
 
       // 2. Iniciar fluxo de autenticação WebAuthn
       console.log('[useBiometry] Iniciando autenticação WebAuthn');
+      console.log('[useBiometry] Options challenge tipo:', typeof data.options.challenge);
       let assertionResponse;
       try {
         assertionResponse = await startAuthentication(data.options);
         console.log('[useBiometry] Autenticação bem-sucedida, enviando para servidor');
         console.log('[useBiometry] Credential ID tipo:', typeof assertionResponse.id, 'tamanho:', assertionResponse.id?.length);
+        console.log('[useBiometry] Credential ID valor:', assertionResponse.id);
+        console.log('[useBiometry] UserId que será enviado:', data.userId);
       } catch (authError: any) {
         console.error('[useBiometry] Erro ao chamar startAuthentication:', authError);
         throw new Error(`Erro ao autenticar: ${authError.message}`);
       }
 
       // 3. Verificar resposta no servidor (faz login)
+      console.log('[useBiometry] Enviando para verify com userId:', data.userId, 'credential.id:', assertionResponse.id);
       const verifyRes = await fetch('/api/auth/webauthn/authenticate/verify', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

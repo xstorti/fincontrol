@@ -4,6 +4,34 @@ import { supabaseAdmin } from '@/lib/supabase';
 import { cookies } from 'next/headers';
 
 /**
+ * Converter Uint8Array ou Buffer para base64url string
+ * Base64url: - em vez de +, _ em vez de /, sem padding
+ */
+function bufferToBase64url(buffer: Uint8Array | ArrayBuffer | Buffer): string {
+  // Converter para Uint8Array se necessário
+  let bytes: Uint8Array;
+  if (buffer instanceof Uint8Array) {
+    bytes = buffer;
+  } else if (buffer instanceof ArrayBuffer) {
+    bytes = new Uint8Array(buffer);
+  } else if (Buffer.isBuffer(buffer)) {
+    bytes = new Uint8Array(buffer);
+  } else {
+    bytes = new Uint8Array(buffer as any);
+  }
+
+  // Converter para base64
+  const binaryString = String.fromCharCode(...bytes);
+  const base64 = Buffer.from(binaryString, 'binary').toString('base64');
+
+  // Converter base64 para base64url (substituir + por -, / por _, remover =)
+  return base64
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_')
+    .replace(/=/g, '');
+}
+
+/**
  * Gera opções de autenticação WebAuthn para login
  * POST /api/auth/webauthn/authenticate/options
  * Body: { email: string }
@@ -72,21 +100,31 @@ export async function POST(request: NextRequest) {
       allowCredentials: options.allowCredentials?.length,
     });
 
+    // Converter challenge para base64url (como string para transmissão)
+    const challengeBase64url = bufferToBase64url(options.challenge as any);
+    console.log('[WebAuthn Authenticate Options] Challenge convertido para base64url:', challengeBase64url.substring(0, 20) + '...');
+
+    // Converter allowCredentials id's para base64url também
+    const allowCredentialsBase64url = (options.allowCredentials || []).map((cred: any) => ({
+      ...cred,
+      id: typeof cred.id === 'string' ? cred.id : bufferToBase64url(cred.id as any),
+    }));
+
     // Salvar challenge no cookie para validação posterior
     const cookieStore = await cookies();
-    cookieStore.set('webauthn_challenge', (options as any).challenge as string, {
+    cookieStore.set('webauthn_challenge', challengeBase64url, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
       maxAge: 300, // 5 minutos
     });
 
-    // Converter para formato seguro para JSON
+    // Converter para formato seguro para JSON com base64url strings
     const safeOptions = {
-      challenge: options.challenge,
+      challenge: challengeBase64url,
       timeout: options.timeout,
       rpId: options.rpId,
-      allowCredentials: options.allowCredentials,
+      allowCredentials: allowCredentialsBase64url,
       userVerification: options.userVerification,
     };
 

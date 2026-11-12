@@ -147,10 +147,17 @@ export function useBiometry(): UseBiometryReturn {
       // 2. Iniciar fluxo de registro WebAuthn
       let attestationResponse;
       try {
-        console.log('[useBiometry] Chamando startRegistration com options:', {
-          challenge: typeof optionsWithArrayBuffer.challenge,
-          user: { id: typeof optionsWithArrayBuffer.user.id, name: optionsWithArrayBuffer.user.name },
-        });
+        console.log('[useBiometry] Chamando startRegistration com options completo:');
+        console.log('[useBiometry] Options keys:', Object.keys(optionsWithArrayBuffer));
+        console.log('[useBiometry] Options.challenge tipo:', typeof optionsWithArrayBuffer.challenge, 'byteLength:', optionsWithArrayBuffer.challenge.byteLength);
+        console.log('[useBiometry] Options.user tipo:', typeof optionsWithArrayBuffer.user);
+        console.log('[useBiometry] Options.user.id tipo:', typeof optionsWithArrayBuffer.user.id, 'byteLength:', optionsWithArrayBuffer.user.id?.byteLength);
+        console.log('[useBiometry] Options.rp:', optionsWithArrayBuffer.rp);
+        console.log('[useBiometry] Options.pubKeyCredParams:', optionsWithArrayBuffer.pubKeyCredParams);
+        console.log('[useBiometry] Options.authenticatorSelection:', optionsWithArrayBuffer.authenticatorSelection);
+        console.log('[useBiometry] Options.attestation:', optionsWithArrayBuffer.attestation);
+        console.log('[useBiometry] Options.timeout:', optionsWithArrayBuffer.timeout);
+        
         attestationResponse = await startRegistration(optionsWithArrayBuffer);
         console.log('[useBiometry] Registro bem-sucedido, enviando para servidor');
         console.log('[useBiometry] Credential ID tipo:', typeof attestationResponse.id, 'tamanho:', attestationResponse.id?.length);
@@ -158,6 +165,7 @@ export function useBiometry(): UseBiometryReturn {
         console.log('[useBiometry] Attestation response completo:', JSON.stringify(attestationResponse, null, 2).substring(0, 500));
       } catch (regError: any) {
         console.error('[useBiometry] Erro ao chamar startRegistration:', regError);
+        console.error('[useBiometry] Stack:', regError.stack);
         throw new Error(`Erro ao registrar biometria: ${regError.message}`);
       }
 

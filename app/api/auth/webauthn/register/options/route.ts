@@ -4,6 +4,34 @@ import { supabaseAdmin } from '@/lib/supabase';
 import { cookies } from 'next/headers';
 
 /**
+ * Converter Uint8Array ou Buffer para base64url string
+ * Base64url: - em vez de +, _ em vez de /, sem padding
+ */
+function bufferToBase64url(buffer: Uint8Array | ArrayBuffer | Buffer): string {
+  // Converter para Uint8Array se necessário
+  let bytes: Uint8Array;
+  if (buffer instanceof Uint8Array) {
+    bytes = buffer;
+  } else if (buffer instanceof ArrayBuffer) {
+    bytes = new Uint8Array(buffer);
+  } else if (Buffer.isBuffer(buffer)) {
+    bytes = new Uint8Array(buffer);
+  } else {
+    bytes = new Uint8Array(buffer as any);
+  }
+
+  // Converter para base64
+  const binaryString = String.fromCharCode(...bytes);
+  const base64 = Buffer.from(binaryString, 'binary').toString('base64');
+
+  // Converter base64 para base64url (substituir + por -, / por _, remover =)
+  return base64
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_')
+    .replace(/=/g, '');
+}
+
+/**
  * Gera opções de registro WebAuthn
  * POST /api/auth/webauthn/register/options
  * Body: { email: string }
@@ -71,25 +99,42 @@ export async function POST(request: NextRequest) {
       pubKeyCredParams: options.pubKeyCredParams?.length,
     });
 
-    // Salvar challenge na sessão/cookie para validação posterior
+    // Converter challenge para base64url (como string para transmissão)
+    const challengeBase64url = bufferToBase64url(options.challenge as any);
+    console.log('[WebAuthn Register Options] Challenge convertido para base64url:', challengeBase64url.substring(0, 20) + '...');
+
+    // Converter user.id para base64url (como string para transmissão)
+    const userIdBase64url = bufferToBase64url(options.user.id as any);
+    console.log('[WebAuthn Register Options] User ID convertido para base64url:', userIdBase64url.substring(0, 20) + '...');
+
+    // Salvar challenge no cookie para validação posterior
     const cookieStore = await cookies();
-    cookieStore.set('webauthn_challenge', (options as any).challenge as string, {
+    cookieStore.set('webauthn_challenge', challengeBase64url, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
       maxAge: 300, // 5 minutos
     });
 
-    // Converter para formato seguro para JSON
+    // Converter para formato seguro para JSON com base64url strings
     const safeOptions = {
-      challenge: options.challenge,
+      challenge: challengeBase64url,
       rp: options.rp,
-      user: options.user,
+      user: {
+        ...options.user,
+        id: userIdBase64url,
+      },
       pubKeyCredParams: options.pubKeyCredParams,
       authenticatorSelection: options.authenticatorSelection,
       timeout: options.timeout,
       attestation: options.attestation,
     };
+
+    console.log('[WebAuthn Register Options] Safe options estrutura:');
+    console.log('[WebAuthn Register Options] Keys:', Object.keys(safeOptions));
+    console.log('[WebAuthn Register Options] challenge type:', typeof safeOptions.challenge, 'length:', safeOptions.challenge?.length);
+    console.log('[WebAuthn Register Options] user.id type:', typeof safeOptions.user.id, 'length:', safeOptions.user.id?.length);
+    console.log('[WebAuthn Register Options] attestation:', safeOptions.attestation);
 
     console.log('[WebAuthn Register Options] Safe options pronta para envio');
 

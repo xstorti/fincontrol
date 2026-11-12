@@ -60,6 +60,8 @@ export async function POST(request: NextRequest) {
       },
       attestationType: 'direct',
       timeout: 60000,
+      // Remover qualquer transporte que não seja platform (evita QR code)
+      supportedAlgorithmIDs: [-7, -257], // ES256, RS256
     });
 
     console.log('[WebAuthn Register Options] Options geradas:', {

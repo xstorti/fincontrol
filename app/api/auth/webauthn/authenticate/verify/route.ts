@@ -38,18 +38,34 @@ export async function POST(request: NextRequest) {
     }
 
     try {
+      // Converter credential.id para string de forma consistente
+      const credentialId = credential.id;
+      let credentialIdStr: string;
+      
+      if (typeof credentialId === 'string') {
+        credentialIdStr = credentialId;
+      } else if (credentialId instanceof Uint8Array || credentialId instanceof ArrayBuffer) {
+        // Converter para base64
+        const bytes = credentialId instanceof Uint8Array ? credentialId : new Uint8Array(credentialId);
+        credentialIdStr = Buffer.from(bytes).toString('base64');
+      } else {
+        credentialIdStr = String(credentialId);
+      }
+      
+      console.log('[WebAuthn Authenticate Verify] Procurando credential (tipo: ' + typeof credentialId + ')');
+
       // Buscar credencial no banco de dados
       const { data: dbCredential, error: credError } = await supabaseAdmin
         .from('webauthn_credentials')
         .select('*')
         .eq('usuario_id', parseInt(userId as any))
-        .eq('credential_id', credential.id)
+        .eq('credential_id', credentialIdStr)
         .single();
 
       console.log('[WebAuthn Authenticate Verify] Credencial buscada:', !!dbCredential, credError?.message);
 
       if (credError || !dbCredential) {
-        console.log('[WebAuthn Authenticate Verify] Credencial não encontrada');
+        console.log('[WebAuthn Authenticate Verify] Credencial não encontrada para ID:', credentialIdStr);
         return NextResponse.json(
           { error: 'Credencial não encontrada' },
           { status: 404 }
@@ -63,13 +79,22 @@ export async function POST(request: NextRequest) {
       
       console.log('[WebAuthn Authenticate Verify] Usando RP_ID:', rpId, 'RP_ORIGIN:', rpOrigin);
       
+      // Converter credential.id de base64 de volta para formato esperado
+      let credentialIdForVerification: any;
+      if (typeof dbCredential.credential_id === 'string' && dbCredential.credential_id.match(/^[A-Za-z0-9+/=]+$/)) {
+        // Se parece ser base64, converter para Buffer
+        credentialIdForVerification = Buffer.from(dbCredential.credential_id, 'base64');
+      } else {
+        credentialIdForVerification = dbCredential.credential_id;
+      }
+      
       const verification = await verifyAuthenticationResponse({
         response: credential,
         expectedChallenge: challenge,
         expectedOrigin: rpOrigin,
         expectedRPID: rpId,
         credential: {
-          id: dbCredential.credential_id,
+          id: credentialIdForVerification,
           publicKey: Buffer.from(dbCredential.public_key),
           counter: dbCredential.sign_count,
           transports: dbCredential.transports || ['internal'],

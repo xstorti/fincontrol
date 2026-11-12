@@ -58,11 +58,31 @@ export async function POST(request: NextRequest) {
       }
 
       // Salvar credencial no banco de dados
+      const credentialId = verification.registrationInfo?.credential.id;
+      
+      // Converter credential.id para string se necessário
+      let credentialIdStr: string;
+      if (typeof credentialId === 'string') {
+        credentialIdStr = credentialId;
+      } else if (credentialId) {
+        // Converter buffer/arraybuffer para base64
+        try {
+          const bytes = new Uint8Array(credentialId as any);
+          credentialIdStr = Buffer.from(bytes).toString('base64');
+        } catch (e) {
+          credentialIdStr = String(credentialId);
+        }
+      } else {
+        credentialIdStr = '';
+      }
+      
+      console.log('[WebAuthn Register Verify] Credential ID salvo (tipo: ' + typeof credentialId + ', tamanho: ' + (credentialId?.length || 0) + ')');
+
       const { data, error } = await supabaseAdmin
         .from('webauthn_credentials')
         .insert({
           usuario_id: parseInt(userId as any),
-          credential_id: verification.registrationInfo?.credential.id,
+          credential_id: credentialIdStr,
           public_key: Buffer.from(verification.registrationInfo?.credential.publicKey || []),
           sign_count: 0,
           transports: credential.response?.transports || [],

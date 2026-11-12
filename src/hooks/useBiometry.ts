@@ -92,6 +92,8 @@ export function useBiometry(): UseBiometryReturn {
       let attestationResponse;
       try {
         attestationResponse = await startRegistration(data.options);
+        console.log('[useBiometry] Registro bem-sucedido, enviando para servidor');
+        console.log('[useBiometry] Credential ID tipo:', typeof attestationResponse.id, 'tamanho:', attestationResponse.id?.length);
       } catch (regError: any) {
         console.error('[useBiometry] Erro ao chamar startRegistration:', regError);
         throw new Error(`Erro ao registrar biometria: ${regError.message}`);
@@ -177,6 +179,8 @@ export function useBiometry(): UseBiometryReturn {
       let assertionResponse;
       try {
         assertionResponse = await startAuthentication(data.options);
+        console.log('[useBiometry] Autenticação bem-sucedida, enviando para servidor');
+        console.log('[useBiometry] Credential ID tipo:', typeof assertionResponse.id, 'tamanho:', assertionResponse.id?.length);
       } catch (authError: any) {
         console.error('[useBiometry] Erro ao chamar startAuthentication:', authError);
         throw new Error(`Erro ao autenticar: ${authError.message}`);

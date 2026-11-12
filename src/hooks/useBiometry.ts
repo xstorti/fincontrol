@@ -58,6 +58,7 @@ export function useBiometry(): UseBiometryReturn {
       }
 
       const finalDeviceName = deviceName || getDeviceName();
+      console.log('[useBiometry] Iniciando registerBiometry para:', { email, deviceName: finalDeviceName });
 
       // 1. Gerar opções de registro
       const optionsRes = await fetch('/api/auth/webauthn/register/options', {
@@ -68,10 +69,13 @@ export function useBiometry(): UseBiometryReturn {
       });
 
       if (!optionsRes.ok) {
+        const errorData = await optionsRes.json();
+        console.error('[useBiometry] Erro ao gerar opções:', errorData);
         throw new Error('Erro ao gerar opções de registro');
       }
 
       const { data } = await optionsRes.json();
+      console.log('[useBiometry] Opções geradas, iniciando registro WebAuthn');
 
       // 2. Iniciar fluxo de registro WebAuthn
       const attestationResponse = await startRegistration(data.options);
@@ -90,13 +94,16 @@ export function useBiometry(): UseBiometryReturn {
 
       if (!verifyRes.ok) {
         const errorData = await verifyRes.json();
+        console.error('[useBiometry] Erro ao verificar registro:', errorData);
         throw new Error(errorData.error || 'Erro ao registrar biometria');
       }
 
+      console.log('[useBiometry] Biometria registrada com sucesso');
       setIsLoading(false);
       return true;
     } catch (err: any) {
       const errorMessage = err.message || 'Erro ao registrar biometria';
+      console.error('[useBiometry] Erro completo:', err);
       setError(errorMessage);
       setIsLoading(false);
       return false;
@@ -113,6 +120,8 @@ export function useBiometry(): UseBiometryReturn {
         throw new Error('Biometria não é suportada neste dispositivo');
       }
 
+      console.log('[useBiometry] Iniciando loginWithBiometry para:', email);
+
       // 1. Gerar opções de autenticação
       const optionsRes = await fetch('/api/auth/webauthn/authenticate/options', {
         method: 'POST',
@@ -121,20 +130,27 @@ export function useBiometry(): UseBiometryReturn {
         credentials: 'include',
       });
 
+      console.log('[useBiometry] Response status:', optionsRes.status);
+
       if (!optionsRes.ok) {
         const errorData = await optionsRes.json();
+        const errorMsg = errorData.error || `HTTP ${optionsRes.status}`;
+        console.log('[useBiometry] Erro ao gerar opções:', errorMsg);
+        
         // Se não tiver biometria registrada, retorna null para que o componente abra o modal de registro
-        if (errorData.error?.includes('Nenhuma biometria')) {
-          setError(null);
+        if (errorMsg.includes('Nenhuma biometria') || optionsRes.status === 404) {
+          console.log('[useBiometry] Nenhuma biometria registrada - abrindo modal');
+          setError('Nenhuma biometria registrada para este usuário');
           setIsLoading(false);
           return null;
         }
-        throw new Error(errorData.error || 'Erro ao gerar opções de autenticação');
+        throw new Error(errorMsg);
       }
 
       const { data } = await optionsRes.json();
 
       // 2. Iniciar fluxo de autenticação WebAuthn
+      console.log('[useBiometry] Iniciando autenticação WebAuthn');
       const assertionResponse = await startAuthentication(data.options);
 
       // 3. Verificar resposta no servidor (faz login)
@@ -154,10 +170,12 @@ export function useBiometry(): UseBiometryReturn {
       }
 
       const userData = await verifyRes.json();
+      console.log('[useBiometry] Login bem-sucedido');
       setIsLoading(false);
       return userData.data;
     } catch (err: any) {
       const errorMessage = err.message || 'Erro ao fazer login com biometria';
+      console.error('[useBiometry] Erro:', errorMessage);
       setError(errorMessage);
       setIsLoading(false);
       return null;

@@ -11,6 +11,15 @@ interface BiometricLoginProps {
 }
 
 /**
+ * Detectar se é dispositivo móvel (iOS/Android)
+ */
+function isMobileDevice(): boolean {
+  if (typeof window === 'undefined') return false;
+  const ua = navigator.userAgent.toLowerCase();
+  return /iphone|ipad|android|mobile/.test(ua) && !/windows|mac|linux/.test(ua);
+}
+
+/**
  * Componente para fazer login com biometria
  * Abre modal de registro se não houver biometria registrada
  */
@@ -19,12 +28,15 @@ export function BiometricLogin({ email, onSuccess, onError }: BiometricLoginProp
   const [showBiometric, setShowBiometric] = useState(false);
   const [showRegistrationModal, setShowRegistrationModal] = useState(false);
   const [isRegistering, setIsRegistering] = useState(false);
+  const [debugError, setDebugError] = useState<string | null>(null);
 
   useEffect(() => {
     if (error && showRegistrationModal) {
       // Erro já é exibido no modal
+      setDebugError(error);
     } else if (error) {
       onError(error);
+      setDebugError(error);
     }
   }, [error, showRegistrationModal, onError]);
 
@@ -34,35 +46,51 @@ export function BiometricLogin({ email, onSuccess, onError }: BiometricLoginProp
       return;
     }
 
+    console.log('[BiometricLogin] Iniciando login com biometria para:', email);
     const user = await loginWithBiometry(email);
+    
+    console.log('[BiometricLogin] Resposta do servidor:', { user, error });
     
     if (user) {
       // Login bem-sucedido
+      console.log('[BiometricLogin] Login bem-sucedido');
       onSuccess(user);
     } else if (!user && error?.includes('Nenhuma biometria')) {
       // Nenhuma biometria registrada - abrir modal
+      console.log('[BiometricLogin] Nenhuma biometria, abrindo modal de registro');
       setShowRegistrationModal(true);
+    } else {
+      // Outro erro
+      console.log('[BiometricLogin] Erro não tratado:', error);
+      setDebugError(error || 'Erro desconhecido ao fazer login com biometria');
     }
   };
 
   const handleRegisterBiometry = async () => {
     setIsRegistering(true);
     const deviceName = getDeviceName();
+    console.log('[BiometricLogin] Iniciando registro de biometria para dispositivo:', deviceName);
     const success = await registerBiometry(email, deviceName);
     
     if (success) {
+      console.log('[BiometricLogin] Registro bem-sucedido, fazendo login automático');
       setShowRegistrationModal(false);
       // Após registrar, faz login automaticamente
       const user = await loginWithBiometry(email);
       if (user) {
         onSuccess(user);
       }
+    } else {
+      console.log('[BiometricLogin] Erro ao registrar:', error);
     }
     setIsRegistering(false);
   };
 
   useEffect(() => {
-    setShowBiometric(isBiometryAvailable && !!email);
+    // Mostrar biometria apenas em dispositivos móveis
+    const isMobile = isMobileDevice();
+    setShowBiometric(isMobile && isBiometryAvailable && !!email);
+    console.log('[BiometricLogin] Estado:', { isMobile, isBiometryAvailable, email: !!email, showBiometric: isMobile && isBiometryAvailable && !!email });
   }, [isBiometryAvailable, email]);
 
   if (!showBiometric) {
@@ -138,10 +166,13 @@ export function BiometricLogin({ email, onSuccess, onError }: BiometricLoginProp
             </div>
 
             {/* Error Message */}
-            {error && (
+            {(error || debugError) && (
               <div className="p-3 bg-red-500/10 border border-red-500/30 rounded-lg flex gap-2 items-start">
                 <AlertCircle size={16} className="text-red-400 flex-shrink-0 mt-0.5" strokeWidth={2.5} />
-                <p className="text-xs text-red-300">{error}</p>
+                <div className="text-xs text-red-300">
+                  <p>{error || debugError}</p>
+                  <p className="text-red-400/60 mt-1">Debug: Verifique o console do navegador (F12)</p>
+                </div>
               </div>
             )}
 

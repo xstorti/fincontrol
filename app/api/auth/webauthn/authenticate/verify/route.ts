@@ -13,7 +13,10 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { userId, credential } = body;
 
+    console.log('[WebAuthn Authenticate Verify] Recebido:', { userId, hasCredential: !!credential });
+
     if (!userId || !credential) {
+      console.log('[WebAuthn Authenticate Verify] Dados inválidos');
       return NextResponse.json(
         { error: 'Dados de autenticação inválidos' },
         { status: 400 }
@@ -24,7 +27,10 @@ export async function POST(request: NextRequest) {
     const cookieStore = await cookies();
     const challenge = cookieStore.get('webauthn_challenge')?.value;
 
+    console.log('[WebAuthn Authenticate Verify] Challenge recuperado:', !!challenge);
+
     if (!challenge) {
+      console.log('[WebAuthn Authenticate Verify] Challenge expirado ou não encontrado');
       return NextResponse.json(
         { error: 'Challenge expirado. Tente novamente' },
         { status: 400 }
@@ -40,7 +46,10 @@ export async function POST(request: NextRequest) {
         .eq('credential_id', credential.id)
         .single();
 
+      console.log('[WebAuthn Authenticate Verify] Credencial buscada:', !!dbCredential, credError?.message);
+
       if (credError || !dbCredential) {
+        console.log('[WebAuthn Authenticate Verify] Credencial não encontrada');
         return NextResponse.json(
           { error: 'Credencial não encontrada' },
           { status: 404 }
@@ -48,6 +57,7 @@ export async function POST(request: NextRequest) {
       }
 
       // Verificar resposta de autenticação
+      console.log('[WebAuthn Authenticate Verify] Verificando resposta de autenticação');
       const verification = await verifyAuthenticationResponse({
         response: credential,
         expectedChallenge: challenge,
@@ -61,7 +71,10 @@ export async function POST(request: NextRequest) {
         },
       });
 
+      console.log('[WebAuthn Authenticate Verify] Verificação concluída:', verification.verified);
+
       if (!verification.verified) {
+        console.log('[WebAuthn Authenticate Verify] Falha na verificação');
         return NextResponse.json(
           { error: 'Falha na verificação de autenticação' },
           { status: 400 }

@@ -12,7 +12,10 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { userId, credential, deviceName } = body;
 
+    console.log('[WebAuthn Register Verify] Recebido:', { userId, deviceName, hasCredential: !!credential });
+
     if (!userId || !credential) {
+      console.log('[WebAuthn Register Verify] Dados inválidos');
       return NextResponse.json(
         { error: 'Dados de credencial inválidos' },
         { status: 400 }
@@ -23,7 +26,10 @@ export async function POST(request: NextRequest) {
     const cookieStore = await cookies();
     const challenge = cookieStore.get('webauthn_challenge')?.value;
 
+    console.log('[WebAuthn Register Verify] Challenge recuperado:', !!challenge);
+
     if (!challenge) {
+      console.log('[WebAuthn Register Verify] Challenge expirado ou não encontrado');
       return NextResponse.json(
         { error: 'Challenge expirado. Tente novamente' },
         { status: 400 }

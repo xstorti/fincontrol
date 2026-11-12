@@ -20,6 +20,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    console.log('[WebAuthn Register Options] Email recebido:', email);
+
     // Buscar usuário
     const { data: user, error: userError } = await supabaseAdmin
       .from('users')
@@ -28,11 +30,14 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (userError || !user) {
+      console.log('[WebAuthn Register Options] Usuário não encontrado:', email);
       return NextResponse.json(
         { error: 'Usuário não encontrado' },
         { status: 404 }
       );
     }
+
+    console.log('[WebAuthn Register Options] Usuário encontrado:', user.id);
 
     // Converter id para Buffer (WebAuthn requer ArrayBuffer)
     const userIdBuffer = Buffer.alloc(8);

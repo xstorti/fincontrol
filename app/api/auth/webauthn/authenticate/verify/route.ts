@@ -45,24 +45,45 @@ export async function POST(request: NextRequest) {
     const rpId = process.env.NEXT_PUBLIC_RP_ID || 'fincontrol-three-indol.vercel.app';
     const rpOrigin = process.env.NEXT_PUBLIC_RP_ORIGIN || 'https://fincontrol-three-indol.vercel.app';
 
-    // Supabase retorna BYTEA como string base64 via PostgREST
-    console.log('[WebAuthn Auth Verify] public_key tipo:', typeof dbCredential.public_key);
-    console.log('[WebAuthn Auth Verify] public_key amostra:', String(dbCredential.public_key).substring(0, 40));
+    const rawPk = dbCredential.public_key;
+    console.log('[WebAuthn Auth Verify] public_key tipo:', typeof rawPk);
+    console.log('[WebAuthn Auth Verify] public_key amostra:', String(rawPk).substring(0, 60));
 
-    // Copiar para ArrayBuffer proprio (Buffer Node.js usa pool SharedArrayBuffer)
+    // Decodificar chave publica - suporta multiplos formatos retornados pelo PostgREST
     function toUint8Array(data: any): Uint8Array<ArrayBuffer> {
       let bytes: Uint8Array;
       if (typeof data === 'string') {
-        bytes = new Uint8Array(Buffer.from(data, 'base64'));
-      } else {
+        if (data.startsWith('\\x')) {
+          // Formato hex PostgreSQL: \xABCD...
+          bytes = new Uint8Array(Buffer.from(data.slice(2), 'hex'));
+        } else {
+          // PostgREST retorna BYTEA como base64
+          const decoded = Buffer.from(data, 'base64');
+          // Verificar se e JSON de Buffer serializado incorretamente
+          if (decoded.length > 0 && decoded[0] === 0x7B) {
+            try {
+              const parsed = JSON.parse(decoded.toString('utf8'));
+              if (parsed.type === 'Buffer' && Array.isArray(parsed.data)) {
+                bytes = new Uint8Array(parsed.data);
+              } else {
+                bytes = new Uint8Array(decoded);
+              }
+            } catch { bytes = new Uint8Array(decoded); }
+          } else {
+            bytes = new Uint8Array(decoded);
+          }
+        }
+      } else if (Array.isArray(data)) {
         bytes = new Uint8Array(data);
+      } else {
+        bytes = new Uint8Array(Buffer.from(data));
       }
       const ab = new ArrayBuffer(bytes.byteLength);
       new Uint8Array(ab).set(bytes);
       return new Uint8Array(ab);
     }
 
-    const publicKeyBuffer = toUint8Array(dbCredential.public_key);
+    const publicKeyBuffer = toUint8Array(rawPk);
     console.log('[WebAuthn Auth Verify] publicKey byteLength:', publicKeyBuffer.byteLength);
 
     let verification;

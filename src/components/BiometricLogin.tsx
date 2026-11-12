@@ -43,7 +43,9 @@ export function BiometricLogin({ email, onSuccess, onError }: BiometricLoginProp
 
   const handleBiometricLogin = async () => {
     if (!email) {
-      onError('Por favor, insira seu email primeiro');
+      const msg = 'Por favor, insira seu email primeiro';
+      onError(msg);
+      setDebugError(msg);
       return;
     }
 
@@ -60,6 +62,10 @@ export function BiometricLogin({ email, onSuccess, onError }: BiometricLoginProp
       // Sem biometria registrada - abrir modal automaticamente
       console.log('[BiometricLogin] Nenhuma biometria, abrindo modal de registro');
       setShowRegistrationModal(true);
+      // Mostrar erro visível
+      if (error) {
+        setDebugError(error);
+      }
     }
   };
 
@@ -84,10 +90,12 @@ export function BiometricLogin({ email, onSuccess, onError }: BiometricLoginProp
   };
 
   useEffect(() => {
-    // Mostrar biometria apenas em dispositivos móveis
-    const isMobile = isMobileDevice();
-    setShowBiometric(isMobile && isBiometryAvailable && !!email);
-    console.log('[BiometricLogin] Estado:', { isMobile, isBiometryAvailable, email: !!email, showBiometric: isMobile && isBiometryAvailable && !!email });
+    // Mostrar biometria em qualquer dispositivo (temporário para debug)
+    // TODO: Remover ?debug=true depois e restaurar: const isMobile = isMobileDevice();
+    const params = new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '');
+    const debugMode = params.get('debug') === 'true' || true; // Forçado para debug
+    setShowBiometric(debugMode && isBiometryAvailable && !!email);
+    console.log('[BiometricLogin] Estado:', { debugMode, isBiometryAvailable, email: !!email, showBiometric: debugMode && isBiometryAvailable && !!email });
   }, [isBiometryAvailable, email]);
 
   if (!showBiometric) {
@@ -96,6 +104,22 @@ export function BiometricLogin({ email, onSuccess, onError }: BiometricLoginProp
 
   return (
     <>
+      {/* Debug Error Alert - Visível mesmo sem DevTools */}
+      {debugError && (
+        <div className="mb-4 p-3 bg-red-500/20 border border-red-500/50 rounded-lg flex gap-3 items-start">
+          <AlertCircle size={18} className="text-red-400 flex-shrink-0 mt-0.5" strokeWidth={2.5} />
+          <div className="flex-1">
+            <p className="text-sm font-semibold text-red-300">Erro</p>
+            <p className="text-xs text-red-200 mt-1">{debugError}</p>
+          </div>
+          <button
+            onClick={() => setDebugError(null)}
+            className="text-red-400 hover:text-red-300 flex-shrink-0"
+          >
+            <X size={16} strokeWidth={2.5} />
+          </button>
+        </div>
+      )}
       {/* Divider */}
       <div className="flex items-center gap-3">
         <div className="flex-1 h-px bg-neutral-600/50"></div>

@@ -44,7 +44,7 @@ export async function POST(request: NextRequest) {
     userIdBuffer.writeBigInt64BE(BigInt(user.id));
 
     // Gerar opções de registro WebAuthn
-    const options = generateRegistrationOptions({
+    const options = await generateRegistrationOptions({
       rpID: process.env.RP_ID || 'fincontrol-three-indol.vercel.app',
       rpName: 'FinControl',
       userName: email,
@@ -59,6 +59,13 @@ export async function POST(request: NextRequest) {
       timeout: 60000,
     });
 
+    console.log('[WebAuthn Register Options] Options geradas:', {
+      challenge: !!options.challenge,
+      rp: !!options.rp,
+      user: !!options.user,
+      pubKeyCredParams: options.pubKeyCredParams?.length,
+    });
+
     // Salvar challenge na sessão/cookie para validação posterior
     const cookieStore = await cookies();
     cookieStore.set('webauthn_challenge', (options as any).challenge as string, {
@@ -68,10 +75,23 @@ export async function POST(request: NextRequest) {
       maxAge: 300, // 5 minutos
     });
 
+    // Converter para formato seguro para JSON
+    const safeOptions = {
+      challenge: options.challenge,
+      rp: options.rp,
+      user: options.user,
+      pubKeyCredParams: options.pubKeyCredParams,
+      authenticatorSelection: options.authenticatorSelection,
+      timeout: options.timeout,
+      attestation: options.attestation,
+    };
+
+    console.log('[WebAuthn Register Options] Safe options pronta para envio');
+
     return NextResponse.json(
       {
         data: {
-          options,
+          options: safeOptions,
           userId: user.id,
         },
       },

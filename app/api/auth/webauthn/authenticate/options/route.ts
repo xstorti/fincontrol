@@ -53,7 +53,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Gerar opções de autenticação
-    const options = generateAuthenticationOptions({
+    const options = await generateAuthenticationOptions({
       rpID: process.env.RP_ID || 'fincontrol-three-indol.vercel.app',
       allowCredentials: credentials.map((cred: any) => ({
         id: cred.credential_id,
@@ -62,6 +62,11 @@ export async function POST(request: NextRequest) {
       })),
       userVerification: 'preferred',
       timeout: 60000,
+    });
+
+    console.log('[WebAuthn Authenticate Options] Options geradas:', {
+      challenge: !!options.challenge,
+      allowCredentials: options.allowCredentials?.length,
     });
 
     // Salvar challenge no cookie para validação posterior
@@ -73,10 +78,21 @@ export async function POST(request: NextRequest) {
       maxAge: 300, // 5 minutos
     });
 
+    // Converter para formato seguro para JSON
+    const safeOptions = {
+      challenge: options.challenge,
+      timeout: options.timeout,
+      rpId: options.rpId,
+      allowCredentials: options.allowCredentials,
+      userVerification: options.userVerification,
+    };
+
+    console.log('[WebAuthn Authenticate Options] Safe options pronta para envio');
+
     return NextResponse.json(
       {
         data: {
-          options,
+          options: safeOptions,
           userId: user.id,
           email: user.email,
         },

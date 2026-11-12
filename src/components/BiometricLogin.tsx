@@ -85,6 +85,7 @@ export function BiometricLogin({ email, onSuccess, onError }: BiometricLoginProp
       }
     } else {
       console.log('[BiometricLogin] Erro ao registrar:', error);
+      setDebugError(error || 'Erro ao registrar biometria. Verifique o console.');
     }
     setIsRegistering(false);
   };

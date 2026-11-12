@@ -333,6 +333,15 @@ export default function DashboardPage() {
           )}
         </div>
       </main>
+
+      {/* Floating Action Button */}
+      <Link
+        href="/adicionar-gasto"
+        className="fixed bottom-6 right-6 sm:bottom-8 sm:right-8 w-14 h-14 sm:w-16 sm:h-16 bg-gradient-to-br from-primary-600 to-primary-700 hover:from-primary-500 hover:to-primary-600 text-white rounded-full flex items-center justify-center shadow-2xl shadow-primary-600/60 hover:shadow-primary-600/80 transition-all duration-300 active:scale-95 border-2 border-primary-500/50 hover:border-primary-400 hover:scale-110 z-50"
+        aria-label="Adicionar Despesa"
+      >
+        <Plus size={28} strokeWidth={2.5} className="transition-all" />
+      </Link>
     </div>
   );
 }

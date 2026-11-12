@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { LoadingSpinner, ErrorAlert, SkeletonList, BiometricRegister } from '@/components';
+import { LoadingSpinner, ErrorAlert, SkeletonList } from '@/components';
 import { KPI, Transaction, User } from '@/types';
 import { Plus, TrendingDown, TrendingUp, BarChart3, Settings, LogOut, ArrowRight } from 'lucide-react';
 import { LineChart, Line, ResponsiveContainer } from 'recharts';
@@ -100,17 +100,6 @@ export default function DashboardPage() {
             Olá, {user?.nome}! 👋
           </h2>
         </div>
-
-        {/* Biometric Registration Section */}
-        {user && (
-          <BiometricRegister
-            email={user.email}
-            onSuccess={() => {
-              // Atualizar página se necessário
-            }}
-            onError={(error) => setError(error)}
-          />
-        )}
 
         {/* KPI Cards Section */}
         {kpi && (

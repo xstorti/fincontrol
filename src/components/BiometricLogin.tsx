@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useBiometry } from '@/hooks/useBiometry';
-import { Fingerprint, AlertCircle } from 'lucide-react';
+import { Fingerprint, AlertCircle, X } from 'lucide-react';
 
 interface BiometricLoginProps {
   email: string;
@@ -12,16 +12,21 @@ interface BiometricLoginProps {
 
 /**
  * Componente para fazer login com biometria
+ * Abre modal de registro se não houver biometria registrada
  */
 export function BiometricLogin({ email, onSuccess, onError }: BiometricLoginProps) {
-  const { isBiometryAvailable, isLoading, error, loginWithBiometry } = useBiometry();
+  const { isBiometryAvailable, isLoading, error, loginWithBiometry, registerBiometry, getDeviceName } = useBiometry();
   const [showBiometric, setShowBiometric] = useState(false);
+  const [showRegistrationModal, setShowRegistrationModal] = useState(false);
+  const [isRegistering, setIsRegistering] = useState(false);
 
   useEffect(() => {
-    if (error) {
+    if (error && showRegistrationModal) {
+      // Erro já é exibido no modal
+    } else if (error) {
       onError(error);
     }
-  }, [error, onError]);
+  }, [error, showRegistrationModal, onError]);
 
   const handleBiometricLogin = async () => {
     if (!email) {
@@ -30,9 +35,30 @@ export function BiometricLogin({ email, onSuccess, onError }: BiometricLoginProp
     }
 
     const user = await loginWithBiometry(email);
+    
     if (user) {
+      // Login bem-sucedido
       onSuccess(user);
+    } else if (!user && error?.includes('Nenhuma biometria')) {
+      // Nenhuma biometria registrada - abrir modal
+      setShowRegistrationModal(true);
     }
+  };
+
+  const handleRegisterBiometry = async () => {
+    setIsRegistering(true);
+    const deviceName = getDeviceName();
+    const success = await registerBiometry(email, deviceName);
+    
+    if (success) {
+      setShowRegistrationModal(false);
+      // Após registrar, faz login automaticamente
+      const user = await loginWithBiometry(email);
+      if (user) {
+        onSuccess(user);
+      }
+    }
+    setIsRegistering(false);
   };
 
   useEffect(() => {
@@ -44,7 +70,7 @@ export function BiometricLogin({ email, onSuccess, onError }: BiometricLoginProp
   }
 
   return (
-    <div className="space-y-3">
+    <>
       {/* Divider */}
       <div className="flex items-center gap-3">
         <div className="flex-1 h-px bg-neutral-600/50"></div>
@@ -77,6 +103,78 @@ export function BiometricLogin({ email, onSuccess, onError }: BiometricLoginProp
           </p>
         </div>
       )}
-    </div>
+
+      {/* Registration Modal */}
+      {showRegistrationModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-neutral-800 border border-neutral-700/50 rounded-2xl shadow-2xl max-w-sm w-full p-6 space-y-4">
+            {/* Header */}
+            <div className="flex items-start justify-between mb-2">
+              <div>
+                <h3 className="text-lg font-black text-white flex items-center gap-2">
+                  <Fingerprint size={24} className="text-emerald-400" strokeWidth={2.5} />
+                  Registrar Biometria
+                </h3>
+                <p className="text-sm text-neutral-400 mt-1">
+                  Nenhuma biometria registrada para este email
+                </p>
+              </div>
+              <button
+                onClick={() => setShowRegistrationModal(false)}
+                className="text-neutral-400 hover:text-white transition-colors"
+              >
+                <X size={20} strokeWidth={2.5} />
+              </button>
+            </div>
+
+            {/* Device Info */}
+            <div className="p-3 bg-emerald-500/10 border border-emerald-500/30 rounded-lg">
+              <p className="text-sm text-emerald-200">
+                <span className="font-semibold">Dispositivo detectado:</span> {getDeviceName()}
+              </p>
+              <p className="text-xs text-emerald-300 mt-1">
+                Sua biometria será registrada automaticamente neste dispositivo
+              </p>
+            </div>
+
+            {/* Error Message */}
+            {error && (
+              <div className="p-3 bg-red-500/10 border border-red-500/30 rounded-lg flex gap-2 items-start">
+                <AlertCircle size={16} className="text-red-400 flex-shrink-0 mt-0.5" strokeWidth={2.5} />
+                <p className="text-xs text-red-300">{error}</p>
+              </div>
+            )}
+
+            {/* Buttons */}
+            <div className="flex gap-3 pt-4">
+              <button
+                onClick={() => setShowRegistrationModal(false)}
+                disabled={isRegistering || isLoading}
+                className="flex-1 py-2.5 bg-neutral-700 hover:bg-neutral-600 disabled:bg-neutral-700 text-white font-semibold rounded-lg transition-all duration-300"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handleRegisterBiometry}
+                disabled={isRegistering || isLoading}
+                className="flex-1 py-2.5 bg-emerald-600 hover:bg-emerald-500 disabled:bg-neutral-600 text-white font-semibold rounded-lg transition-all duration-300 flex items-center justify-center gap-2"
+              >
+                {isRegistering || isLoading ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                    Registrando...
+                  </>
+                ) : (
+                  <>
+                    <Fingerprint size={18} strokeWidth={2.5} />
+                    Registrar
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 }

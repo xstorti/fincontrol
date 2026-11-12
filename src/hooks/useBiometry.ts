@@ -7,6 +7,29 @@ export interface UseBiometryReturn {
   error: string | null;
   registerBiometry: (email: string, deviceName?: string) => Promise<boolean>;
   loginWithBiometry: (email: string) => Promise<{ id: string; email: string; nome: string; tipo_usuario: string; senha_temporaria: boolean } | null>;
+  getDeviceName: () => string;
+}
+
+/**
+ * Detectar nome do dispositivo automaticamente
+ */
+function getDeviceName(): string {
+  if (typeof window === 'undefined') return 'Dispositivo';
+  
+  const ua = navigator.userAgent;
+  
+  if (/iPhone/.test(ua)) return 'iPhone';
+  if (/iPad/.test(ua)) return 'iPad';
+  if (/Android/.test(ua)) {
+    if (/SM-/.test(ua)) return 'Samsung Galaxy';
+    if (/Pixel/.test(ua)) return 'Google Pixel';
+    return 'Android';
+  }
+  if (/Mac/.test(ua)) return 'MacBook';
+  if (/Windows/.test(ua)) return 'Windows PC';
+  if (/Linux/.test(ua)) return 'Linux';
+  
+  return 'Dispositivo';
 }
 
 /**
@@ -34,6 +57,8 @@ export function useBiometry(): UseBiometryReturn {
         throw new Error('Biometria não é suportada neste dispositivo');
       }
 
+      const finalDeviceName = deviceName || getDeviceName();
+
       // 1. Gerar opções de registro
       const optionsRes = await fetch('/api/auth/webauthn/register/options', {
         method: 'POST',
@@ -58,7 +83,7 @@ export function useBiometry(): UseBiometryReturn {
         body: JSON.stringify({
           userId: data.userId,
           credential: attestationResponse,
-          deviceName: deviceName || 'Meu Dispositivo',
+          deviceName: finalDeviceName,
         }),
         credentials: 'include',
       });
@@ -98,6 +123,12 @@ export function useBiometry(): UseBiometryReturn {
 
       if (!optionsRes.ok) {
         const errorData = await optionsRes.json();
+        // Se não tiver biometria registrada, retorna null para que o componente abra o modal de registro
+        if (errorData.error?.includes('Nenhuma biometria')) {
+          setError(null);
+          setIsLoading(false);
+          return null;
+        }
         throw new Error(errorData.error || 'Erro ao gerar opções de autenticação');
       }
 
@@ -139,5 +170,6 @@ export function useBiometry(): UseBiometryReturn {
     error,
     registerBiometry,
     loginWithBiometry,
+    getDeviceName,
   };
 }

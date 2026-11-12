@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { LoadingButton, ErrorAlert } from '@/components';
+import { BiometricLogin } from '@/components/BiometricLogin';
 import { Lock, Mail, ArrowRight } from 'lucide-react';
 
 export default function LoginPage() {
@@ -41,6 +42,14 @@ export default function LoginPage() {
       setError(err.message || 'Erro ao fazer login');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleBiometricSuccess = (user: any) => {
+    if (user.senha_temporaria) {
+      router.push('/mudar-senha');
+    } else {
+      router.push('/dashboard');
     }
   };
 
@@ -138,6 +147,13 @@ export default function LoginPage() {
                 )}
               </LoadingButton>
             </form>
+
+            {/* Biometric Login */}
+            <BiometricLogin
+              email={email}
+              onSuccess={handleBiometricSuccess}
+              onError={setError}
+            />
           </div>
         </div>
 

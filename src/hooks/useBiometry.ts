@@ -82,6 +82,10 @@ export function useBiometry(): UseBiometryReturn {
         throw new Error('Resposta inválida da API: falta options');
       }
 
+      console.log('[useBiometry] Estrutura de options:', Object.keys(data.options));
+      console.log('[useBiometry] Challenge existe?', !!data.options.challenge);
+
+      // 2. Iniciar fluxo de registro WebAuthn
       console.log('[useBiometry] Opções obtidas, iniciando registro WebAuthn');
 
       // 2. Iniciar fluxo de registro WebAuthn

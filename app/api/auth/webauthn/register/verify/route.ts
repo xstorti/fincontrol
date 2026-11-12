@@ -38,11 +38,16 @@ export async function POST(request: NextRequest) {
 
     try {
       // Verificar resposta de registro
+      const rpId = process.env.NEXT_PUBLIC_RP_ID || 'fincontrol-three-indol.vercel.app';
+      const rpOrigin = process.env.NEXT_PUBLIC_RP_ORIGIN || 'https://fincontrol-three-indol.vercel.app';
+      
+      console.log('[WebAuthn Register Verify] Usando RP_ID:', rpId, 'RP_ORIGIN:', rpOrigin);
+      
       const verification = await verifyRegistrationResponse({
         response: credential,
         expectedChallenge: challenge,
-        expectedOrigin: process.env.RP_ORIGIN || 'https://fincontrol-three-indol.vercel.app',
-        expectedRPID: process.env.RP_ID || 'fincontrol-three-indol.vercel.app',
+        expectedOrigin: rpOrigin,
+        expectedRPID: rpId,
       });
 
       if (!verification.verified) {

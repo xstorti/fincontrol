@@ -91,12 +91,10 @@ export function BiometricLogin({ email, onSuccess, onError }: BiometricLoginProp
   };
 
   useEffect(() => {
-    // Mostrar biometria em qualquer dispositivo (temporário para debug)
-    // TODO: Remover ?debug=true depois e restaurar: const isMobile = isMobileDevice();
-    const params = new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '');
-    const debugMode = params.get('debug') === 'true' || true; // Forçado para debug
-    setShowBiometric(debugMode && isBiometryAvailable && !!email);
-    console.log('[BiometricLogin] Estado:', { debugMode, isBiometryAvailable, email: !!email, showBiometric: debugMode && isBiometryAvailable && !!email });
+    // Mostrar biometria apenas em dispositivos móveis
+    const isMobile = isMobileDevice();
+    setShowBiometric(isMobile && isBiometryAvailable && !!email);
+    console.log('[BiometricLogin] Estado:', { isMobile, isBiometryAvailable, email: !!email, showBiometric: isMobile && isBiometryAvailable && !!email });
   }, [isBiometryAvailable, email]);
 
   if (!showBiometric) {

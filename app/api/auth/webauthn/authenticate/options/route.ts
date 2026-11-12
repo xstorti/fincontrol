@@ -53,8 +53,11 @@ export async function POST(request: NextRequest) {
     }
 
     // Gerar opções de autenticação
+    const rpId = process.env.NEXT_PUBLIC_RP_ID || 'fincontrol-three-indol.vercel.app';
+    console.log('[WebAuthn Authenticate Options] Usando RP_ID:', rpId);
+    
     const options = await generateAuthenticationOptions({
-      rpID: process.env.RP_ID || 'fincontrol-three-indol.vercel.app',
+      rpID: rpId,
       allowCredentials: credentials.map((cred: any) => ({
         id: cred.credential_id,
         type: 'public-key',

@@ -44,12 +44,8 @@ export async function POST(request: NextRequest) {
     const credentialId = verification.registrationInfo.credential.id;
     const credentialPublicKey = verification.registrationInfo.credential.publicKey;
 
-    console.log('[WebAuthn Register Verify] Credential ID:', credentialId, 'length:', credentialId.length);
-    console.log('[WebAuthn Register Verify] PublicKey byteLength:', credentialPublicKey.byteLength);
-
-    // Armazenar como hex PostgreSQL - Supabase serializa Buffer como JSON, isso garante bytes corretos
+    // Armazenar com prefixo hex PostgreSQL - Buffer Node.js seria serializado incorretamente via JSON
     const publicKeyHex = `\\x${Buffer.from(credentialPublicKey).toString('hex')}`;
-    console.log('[WebAuthn Register Verify] PublicKey hex (primeiros 20):', publicKeyHex.substring(0, 22));
 
     const { error: insertError } = await supabaseAdmin
       .from('webauthn_credentials')

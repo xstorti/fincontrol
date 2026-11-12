@@ -46,20 +46,15 @@ export async function POST(request: NextRequest) {
     const rpOrigin = process.env.NEXT_PUBLIC_RP_ORIGIN || 'https://fincontrol-three-indol.vercel.app';
 
     const rawPk = dbCredential.public_key;
-    console.log('[WebAuthn Auth Verify] public_key tipo:', typeof rawPk);
-    console.log('[WebAuthn Auth Verify] public_key amostra:', String(rawPk).substring(0, 60));
 
-    // Decodificar chave publica - suporta multiplos formatos retornados pelo PostgREST
+    // Decodifica chave publica - PostgREST pode retornar hex (\x...) ou base64
     function toUint8Array(data: any): Uint8Array<ArrayBuffer> {
       let bytes: Uint8Array;
       if (typeof data === 'string') {
         if (data.startsWith('\\x')) {
-          // Formato hex PostgreSQL: \xABCD...
           bytes = new Uint8Array(Buffer.from(data.slice(2), 'hex'));
         } else {
-          // PostgREST retorna BYTEA como base64
           const decoded = Buffer.from(data, 'base64');
-          // Verificar se e JSON de Buffer serializado incorretamente
           if (decoded.length > 0 && decoded[0] === 0x7B) {
             try {
               const parsed = JSON.parse(decoded.toString('utf8'));
@@ -84,7 +79,6 @@ export async function POST(request: NextRequest) {
     }
 
     const publicKeyBuffer = toUint8Array(rawPk);
-    console.log('[WebAuthn Auth Verify] publicKey byteLength:', publicKeyBuffer.byteLength);
 
     let verification;
     try {

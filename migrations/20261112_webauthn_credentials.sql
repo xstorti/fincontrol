@@ -17,15 +17,3 @@ CREATE INDEX IF NOT EXISTS idx_webauthn_usuario_id ON webauthn_credentials(usuar
 
 -- Índice para buscar por credential_id
 CREATE INDEX IF NOT EXISTS idx_webauthn_credential_id ON webauthn_credentials(credential_id);
-
--- RLS Policy - Usuários podem ver apenas suas próprias credenciais
-ALTER TABLE webauthn_credentials ENABLE ROW LEVEL SECURITY;
-
-CREATE POLICY "Usuários podem ver suas credenciais WebAuthn" ON webauthn_credentials
-  FOR SELECT USING (usuario_id = auth.uid()::bigint);
-
-CREATE POLICY "Sistema pode inserir credenciais WebAuthn" ON webauthn_credentials
-  FOR INSERT WITH CHECK (true);
-
-CREATE POLICY "Usuários podem deletar suas credenciais" ON webauthn_credentials
-  FOR DELETE USING (usuario_id = auth.uid()::bigint);

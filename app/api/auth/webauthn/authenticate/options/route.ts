@@ -49,7 +49,7 @@ export async function POST(request: NextRequest) {
 
     // Gerar opções de autenticação
     const options = generateAuthenticationOptions({
-      rpID: process.env.NEXT_PUBLIC_RP_ID || 'fincontrol-three-indol.vercel.app',
+      rpID: process.env.RP_ID || 'fincontrol-three-indol.vercel.app',
       allowCredentials: credentials.map((cred: any) => ({
         id: cred.credential_id,
         type: 'public-key',

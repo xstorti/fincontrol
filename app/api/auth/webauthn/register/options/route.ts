@@ -40,7 +40,7 @@ export async function POST(request: NextRequest) {
 
     // Gerar opções de registro WebAuthn
     const options = generateRegistrationOptions({
-      rpID: process.env.NEXT_PUBLIC_RP_ID || 'fincontrol-three-indol.vercel.app',
+      rpID: process.env.RP_ID || 'fincontrol-three-indol.vercel.app',
       rpName: 'FinControl',
       userName: email,
       userID: userIdBuffer,

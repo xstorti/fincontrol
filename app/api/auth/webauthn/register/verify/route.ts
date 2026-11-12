@@ -35,8 +35,8 @@ export async function POST(request: NextRequest) {
       const verification = await verifyRegistrationResponse({
         response: credential,
         expectedChallenge: challenge,
-        expectedOrigin: process.env.NEXT_PUBLIC_RP_ORIGIN || 'https://fincontrol-three-indol.vercel.app',
-        expectedRPID: process.env.NEXT_PUBLIC_RP_ID || 'fincontrol-three-indol.vercel.app',
+        expectedOrigin: process.env.RP_ORIGIN || 'https://fincontrol-three-indol.vercel.app',
+        expectedRPID: process.env.RP_ID || 'fincontrol-three-indol.vercel.app',
       });
 
       if (!verification.verified) {
